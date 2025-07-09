@@ -1,10 +1,52 @@
 package excel
 
 import (
+	"job-visualizer/pkg/shared"
+	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/xuri/excelize/v2"
 )
+
+func TestOpenExcelFile(t *testing.T) {
+	tempDirectory := t.TempDir()
+	testFile1 := excelize.NewFile()
+	sheet := "Jobs"
+	testFile1.NewSheet(sheet)
+	_ = testFile1.SetSheetRow(sheet, "A1", &[]string{"Location", "Job Title", "Company Name"})
+	_ = testFile1.SetSheetRow(sheet, "A2", &[]string{"New York", "Software Engineer", "Tech Corp"})
+
+	testFile2 := excelize.NewFile()
+	testFile2.NewSheet(sheet)
+	_ = testFile2.SetSheetRow(sheet, "A1", &[]string{"Location", "Job Title", "Company Name"})
+	_ = testFile2.SetSheetRow(sheet, "A2", &[]string{"San Francisco", "Data Scientist", "Data Inc."})
+	_ = testFile2.SetSheetRow(sheet, "A3", &[]string{"Los Angeles", "Product Manager", "Creative Solutions"})
+
+	testFile1Path := filepath.Join(tempDirectory, "test1.xlsx")
+	testFile2Path := filepath.Join(tempDirectory, "test2.xlsx")
+	err := testFile1.SaveAs(testFile1Path)
+	if err != nil {
+		t.Fatalf("Failed to save test file 1: %v", err)
+	}
+	err = testFile2.SaveAs(testFile2Path)
+	if err != nil {
+		t.Fatalf("Failed to save test file 2: %v", err)
+	}
+	shared.Program.InputFiles = []string{testFile1Path, testFile2Path}
+
+	files := OpenExcelFile()
+
+	if len(files) != 2 {
+		t.Fatalf("Expected 2 files, got %d", len(files))
+	}
+	for i, file := range files {
+		sheets := file.GetSheetList()
+		if !slices.Contains(sheets, sheet) {
+			t.Errorf("File %d does not contain expected sheet '%s'", i+1, sheet)
+		}
+	}
+}
 
 func TestGetAllRows(t *testing.T) {
 	file := excelize.NewFile()
