@@ -35,6 +35,11 @@ func TestSetupDatabase(t *testing.T) {
 	db := CreateDatabase()
 	defer db.Close()
 
+	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
+	if err != nil {
+		t.Errorf("Error dropping existing table: %v", err)
+	}
+
 	SetupDatabase(db)
 
 	tables := []string{"job_data", "qualifications", "links"}
@@ -102,6 +107,11 @@ func TestWriteToDatabase(t *testing.T) {
 	db := CreateDatabase()
 	defer db.Close()
 
+	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
+	if err != nil {
+		t.Errorf("Error dropping existing table: %v", err)
+	}
+
 	SetupDatabase(db)
 
 	testJobs := []shared.JobData{
@@ -134,7 +144,7 @@ func TestWriteToDatabase(t *testing.T) {
 	WriteToDatabase(db, testJobs)
 
 	var jobCount int
-	err := db.QueryRow("SELECT COUNT(*) FROM job_data").Scan(&jobCount)
+	err = db.QueryRow("SELECT COUNT(*) FROM job_data").Scan(&jobCount)
 	if err != nil {
 		t.Errorf("Error counting jobs in database: %v", err)
 	}
@@ -215,5 +225,122 @@ func TestWriteToDatabase(t *testing.T) {
 	}
 	if links != "https://datainc.com/careers" {
 		t.Errorf("Expected links 'https://datainc.com/careers', got '%s'", links)
+	}
+}
+
+func TestCreateMainTable(t *testing.T) {
+	tempDirectory := t.TempDir()
+	shared.Program.OutputDirectory = tempDirectory
+	db := CreateDatabase()
+	defer db.Close()
+
+	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
+	if err != nil {
+		t.Errorf("Error dropping existing table: %v", err)
+	}
+
+	createMainTable(db)
+
+	var tableCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='job_data'").Scan(&tableCount)
+	if err != nil {
+		t.Errorf("Error checking for job_data table: %v", err)
+	}
+	if tableCount != 1 {
+		t.Errorf("Expected job_data table to exist, but it does not")
+	}
+
+	rows, err := db.Query("PRAGMA table_info(job_data)")
+	if err != nil {
+		t.Errorf("Error getting table info for job_data: %v", err)
+	}
+	defer rows.Close()
+
+	expectedColumns := map[string]struct {
+		Type       string
+		NotNull    bool
+		PrimaryKey bool
+	}{
+		"id":             {"INTEGER", false, true},
+		"location":       {"TEXT", true, false},
+		"job_title":      {"TEXT", true, false},
+		"company_name":   {"TEXT", true, false},
+		"description":    {"TEXT", false, false},
+		"date_posted":    {"TEXT", true, false},
+		"salary":         {"INT", false, false},
+		"work_from_home": {"TEXT", false, false},
+		"qualifications": {"TEXT", false, false},
+		"links":          {"TEXT", false, false},
+		"country":        {"TEXT", false, false},
+	}
+
+	foundColumns := make(map[string]struct {
+		Type       string
+		NotNull    bool
+		PrimaryKey bool
+	})
+
+	for rows.Next() {
+		var columnIndex int
+		var name, typ string
+		var notnull int
+		var defaultValue interface{}
+		var primaryKey int
+
+		err := rows.Scan(&columnIndex, &name, &typ, &notnull, &defaultValue, &primaryKey)
+		if err != nil {
+			t.Errorf("Error scanning table info: %v", err)
+		}
+
+		foundColumns[name] = struct {
+			Type       string
+			NotNull    bool
+			PrimaryKey bool
+		}{
+			Type:       typ,
+			NotNull:    notnull == 1,
+			PrimaryKey: primaryKey == 1,
+		}
+	}
+
+	for expectedName, expectedProps := range expectedColumns {
+		foundProps, exists := foundColumns[expectedName]
+		if !exists {
+			t.Errorf("Expected column %s to exist in job_data table, but it does not", expectedName)
+			continue
+		}
+
+		if foundProps.Type != expectedProps.Type {
+			t.Errorf("Expected column %s to be of type %s, but got %s", expectedName, expectedProps.Type, foundProps.Type)
+		}
+
+		if foundProps.NotNull != expectedProps.NotNull {
+			t.Errorf("Expected column %s NOT NULL constraint to be %t, but got %t", expectedName, expectedProps.NotNull, foundProps.NotNull)
+		}
+
+		if foundProps.PrimaryKey != expectedProps.PrimaryKey {
+			t.Errorf("Expected column %s PRIMARY KEY constraint to be %t, but got %t", expectedName, expectedProps.PrimaryKey, foundProps.PrimaryKey)
+		}
+	}
+
+	// testing the insert functionality
+	_, err = db.Exec(`INSERT INTO job_data (location, job_title, company_name, date_posted) 
+		VALUES (?, ?, ?, ?)`, "Test Location", "Test Job", "Test Company", "2024-01-01")
+	if err != nil {
+		t.Errorf("Error inserting test row: %v", err)
+	}
+
+	// verifying insert functionality
+	var id int
+	var location string
+	err = db.QueryRow("SELECT id, location FROM job_data WHERE company_name = ?", "Test Company").Scan(&id, &location)
+	if err != nil {
+		t.Errorf("Error querying inserted row: %v", err)
+	}
+	if id != 1 {
+		t.Errorf("Expected auto-generated ID to be 1, got %d", id)
+	}
+	if location != "Test Location" {
+		t.Errorf("Expected location 'Test Location', got '%s'", location)
 	}
 }
