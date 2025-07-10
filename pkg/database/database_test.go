@@ -95,3 +95,125 @@ func TestSetupDatabase(t *testing.T) {
 		}
 	}
 }
+
+func TestWriteToDatabase(t *testing.T) {
+	tempDirectory := t.TempDir()
+	shared.Program.OutputDirectory = tempDirectory
+	db := CreateDatabase()
+	defer db.Close()
+
+	SetupDatabase(db)
+
+	testJobs := []shared.JobData{
+		{
+			Location:       "Boston, MA",
+			JobTitle:       "Software Engineer",
+			CompanyName:    "Tech Corp",
+			Description:    "Build amazing software",
+			DatePosted:     "2024-01-15",
+			Salary:         80000,
+			WorkFromHome:   "Yes",
+			Qualifications: "Go, SQL, Git",
+			Links:          "https://techcorp.com/jobs",
+			Country:        "USA",
+		},
+		{
+			Location:       "San Francisco, CA",
+			JobTitle:       "Data Scientist",
+			CompanyName:    "Data Inc",
+			Description:    "Analyze big data",
+			DatePosted:     "2024-01-20",
+			Salary:         95000,
+			WorkFromHome:   "No",
+			Qualifications: "Python, R, Machine Learning",
+			Links:          "https://datainc.com/careers",
+			Country:        "USA",
+		},
+	}
+
+	WriteToDatabase(db, testJobs)
+
+	var jobCount int
+	err := db.QueryRow("SELECT COUNT(*) FROM job_data").Scan(&jobCount)
+	if err != nil {
+		t.Errorf("Error counting jobs in database: %v", err)
+	}
+	if jobCount != 2 {
+		t.Errorf("Expected 2 jobs in database, got %d", jobCount)
+	}
+
+	var location, jobTitle, companyName, description, datePosted, workFromHome, country string
+	var salary int
+	err = db.QueryRow(
+		`SELECT location, job_title, company_name, description, date_posted, salary, work_from_home, country 
+		 FROM job_data WHERE company_name = ?`, "Tech Corp",
+	).Scan(&location, &jobTitle, &companyName, &description, &datePosted, &salary, &workFromHome, &country)
+	if err != nil {
+		t.Errorf("Error querying job data: %v", err)
+	}
+
+	// verifying the main table
+	if location != "Boston, MA" {
+		t.Errorf("Expected location 'Boston, MA', got '%s'", location)
+	}
+	if jobTitle != "Software Engineer" {
+		t.Errorf("Expected job title 'Software Engineer', got '%s'", jobTitle)
+	}
+	if companyName != "Tech Corp" {
+		t.Errorf("Expected company name 'Tech Corp', got '%s'", companyName)
+	}
+	if description != "Build amazing software" {
+		t.Errorf("Expected description 'Build amazing software', got '%s'", description)
+	}
+	if datePosted != "2024-01-15" {
+		t.Errorf("Expected date posted '2024-01-15', got '%s'", datePosted)
+	}
+	if salary != 80000 {
+		t.Errorf("Expected salary 80000, got %d", salary)
+	}
+	if workFromHome != "Yes" {
+		t.Errorf("Expected work from home 'Yes', got '%s'", workFromHome)
+	}
+	if country != "USA" {
+		t.Errorf("Expected country 'USA', got '%s'", country)
+	}
+
+	// verifying the qualifications table
+	var qualCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM qualifications").Scan(&qualCount)
+	if err != nil {
+		t.Errorf("Error counting qualifications: %v", err)
+	}
+	if qualCount != 2 {
+		t.Errorf("Expected 2 qualifications entries, got %d", qualCount)
+	}
+
+	// verifying the links table
+	var linkCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM links").Scan(&linkCount)
+	if err != nil {
+		t.Errorf("Error counting links: %v", err)
+	}
+	if linkCount != 2 {
+		t.Errorf("Expected 2 links entries, got %d", linkCount)
+	}
+
+	// verifying the foreign key relationships
+	var qualifications string
+	err = db.QueryRow("SELECT q.qualifications FROM qualifications q JOIN job_data j ON q.id = j.id WHERE j.company_name = ?", "Tech Corp").Scan(&qualifications)
+	if err != nil {
+		t.Errorf("Error querying qualifications with join: %v", err)
+	}
+	if qualifications != "Go, SQL, Git" {
+		t.Errorf("Expected qualifications 'Go, SQL, Git', got '%s'", qualifications)
+	}
+
+	var links string
+	err = db.QueryRow("SELECT l.links FROM links l JOIN job_data j ON l.id = j.id WHERE j.company_name = ?", "Data Inc").Scan(&links)
+	if err != nil {
+		t.Errorf("Error querying links with join: %v", err)
+	}
+	if links != "https://datainc.com/careers" {
+		t.Errorf("Expected links 'https://datainc.com/careers', got '%s'", links)
+	}
+}
