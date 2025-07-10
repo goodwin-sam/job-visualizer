@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"job-visualizer/pkg/shared"
 	"os"
 	"path/filepath"
@@ -9,66 +10,40 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func TestCreateDatabase(t *testing.T) {
+func setupTestDB(t *testing.T) *sql.DB {
 	tempDirectory := t.TempDir()
 	shared.Program.OutputDirectory = tempDirectory
 	db := CreateDatabase()
 	if db == nil {
 		t.Fatal("Expected database, got nil")
 	}
-	defer db.Close()
+	return db
+}
 
-	dbPath := filepath.Join(tempDirectory, "job_data.sqlite")
-	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		t.Errorf("Expected database file to exist at %s, but it does not", dbPath)
-	}
-
-	err := db.Ping()
+func checkTableExists(t *testing.T, db *sql.DB, tableName string) {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", tableName).Scan(&count)
 	if err != nil {
-		t.Errorf("Expected database to be reachable, but got error: %v", err)
+		t.Errorf("Error checking for table %s: %v", tableName, err)
+	}
+	if count != 1 {
+		t.Errorf("Expected table %s to exist, but it does not", tableName)
 	}
 }
 
-func TestSetupDatabase(t *testing.T) {
-	tempDirectory := t.TempDir()
-	shared.Program.OutputDirectory = tempDirectory
-	db := CreateDatabase()
-	defer db.Close()
-
-	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
+func checkRowCount(t *testing.T, db *sql.DB, tableName string, expected int) {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM " + tableName).Scan(&count)
 	if err != nil {
-		t.Errorf("Error dropping existing table: %v", err)
+		t.Errorf("Error counting rows in %s: %v", tableName, err)
 	}
-
-	SetupDatabase(db)
-
-	tables := []string{"job_data", "qualifications", "links"}
-	for _, tableName := range tables {
-		var count int
-		err := db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", tableName).Scan(&count)
-		if err != nil {
-			t.Errorf("Error checking for table %s: %v", tableName, err)
-		}
-		if count != 1 {
-			t.Errorf("Expected table %s to exist, but it does not", tableName)
-		}
+	if count != expected {
+		t.Errorf("Expected %d rows in %s, got %d", expected, tableName, count)
 	}
 }
 
-func TestWriteToDatabase(t *testing.T) {
-	tempDirectory := t.TempDir()
-	shared.Program.OutputDirectory = tempDirectory
-	db := CreateDatabase()
-	defer db.Close()
-
-	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
-	if err != nil {
-		t.Errorf("Error dropping existing table: %v", err)
-	}
-
-	SetupDatabase(db)
-
-	testJobs := []shared.JobData{
+func createTestJobs() []shared.JobData {
+	return []shared.JobData{
 		{
 			Location:       "Boston, MA",
 			JobTitle:       "Software Engineer",
@@ -94,17 +69,56 @@ func TestWriteToDatabase(t *testing.T) {
 			Country:        "USA",
 		},
 	}
+}
+
+func TestCreateDatabase(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	dbPath := filepath.Join(shared.Program.OutputDirectory, "job_data.sqlite")
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		t.Errorf("Expected database file to exist at %s, but it does not", dbPath)
+	}
+
+	err := db.Ping()
+	if err != nil {
+		t.Errorf("Expected database to be reachable, but got error: %v", err)
+	}
+}
+
+func TestSetupDatabase(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
+	if err != nil {
+		t.Errorf("Error dropping existing table: %v", err)
+	}
+
+	SetupDatabase(db)
+
+	tables := []string{"job_data", "qualifications", "links"}
+	for _, tableName := range tables {
+		checkTableExists(t, db, tableName)
+	}
+}
+
+func TestWriteToDatabase(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
+	if err != nil {
+		t.Errorf("Error dropping existing table: %v", err)
+	}
+
+	SetupDatabase(db)
+
+	testJobs := createTestJobs()
 
 	WriteToDatabase(db, testJobs)
 
-	var jobCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM job_data").Scan(&jobCount)
-	if err != nil {
-		t.Errorf("Error counting jobs: %v", err)
-	}
-	if jobCount != 2 {
-		t.Errorf("Expected 2 jobs, got %d", jobCount)
-	}
+	checkRowCount(t, db, "job_data", 2)
 
 	// Check one specific job was inserted correctly
 	var location, jobTitle string
@@ -122,27 +136,12 @@ func TestWriteToDatabase(t *testing.T) {
 	}
 
 	// verifying the related tables
-	var qualCount, linkCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM qualifications").Scan(&qualCount)
-	if err != nil {
-		t.Errorf("Error counting qualifications: %v", err)
-	}
-	if qualCount != 2 {
-		t.Errorf("Expected 2 qualifications entries, got %d", qualCount)
-	}
-	err = db.QueryRow("SELECT COUNT(*) FROM links").Scan(&linkCount)
-	if err != nil {
-		t.Errorf("Error counting links: %v", err)
-	}
-	if linkCount != 2 {
-		t.Errorf("Expected 2 links entries, got %d", linkCount)
-	}
+	checkRowCount(t, db, "qualifications", 2)
+	checkRowCount(t, db, "links", 2)
 }
 
 func TestCreateMainTable(t *testing.T) {
-	tempDirectory := t.TempDir()
-	shared.Program.OutputDirectory = tempDirectory
-	db := CreateDatabase()
+	db := setupTestDB(t)
 	defer db.Close()
 
 	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
@@ -152,15 +151,7 @@ func TestCreateMainTable(t *testing.T) {
 
 	createMainTable(db)
 
-	// checking table exists
-	var tableCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='job_data'").Scan(&tableCount)
-	if err != nil {
-		t.Errorf("Error checking for job_data table: %v", err)
-	}
-	if tableCount != 1 {
-		t.Errorf("Expected job_data table to exist, but it does not")
-	}
+	checkTableExists(t, db, "job_data")
 
 	// testing basic insert functionality
 	_, err = db.Exec(`INSERT INTO job_data (location, job_title, company_name, date_posted) 
@@ -170,20 +161,11 @@ func TestCreateMainTable(t *testing.T) {
 	}
 
 	// verifying data was inserted
-	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM job_data").Scan(&count)
-	if err != nil {
-		t.Errorf("Error counting rows: %v", err)
-	}
-	if count != 1 {
-		t.Errorf("Expected 1 row, got %d", count)
-	}
+	checkRowCount(t, db, "job_data", 1)
 }
 
 func TestCreateSecondaryTables(t *testing.T) {
-	tempDirectory := t.TempDir()
-	shared.Program.OutputDirectory = tempDirectory
-	db := CreateDatabase()
+	db := setupTestDB(t)
 	defer db.Close()
 
 	createMainTable(db)
@@ -192,25 +174,9 @@ func TestCreateSecondaryTables(t *testing.T) {
 
 	tables := []string{"qualifications", "links"}
 	for _, tableName := range tables {
-		var tableCount int
-		err := db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", tableName).Scan(&tableCount)
-		if err != nil {
-			t.Errorf("Error checking for %s table: %v", tableName, err)
-		}
-		if tableCount != 1 {
-			t.Errorf("Expected %s table to exist, but it does not", tableName)
-		}
+		checkTableExists(t, db, tableName)
 	}
 
-	var qualCount int
-	err := db.QueryRow("SELECT COUNT(*) FROM qualifications").Scan(&qualCount)
-	if err != nil {
-		t.Errorf("Error checking qualifications table: %v", err)
-	}
-
-	var linkCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM links").Scan(&linkCount)
-	if err != nil {
-		t.Errorf("Error checking links table: %v", err)
-	}
+	checkRowCount(t, db, "qualifications", 0)
+	checkRowCount(t, db, "links", 0)
 }
