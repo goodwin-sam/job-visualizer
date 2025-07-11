@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -18,7 +19,7 @@ import (
 )
 
 func ProcessLatLongs(jobs []shared.JobData, progressBar *widget.ProgressBar) []shared.JobData {
-	cacheFilename := "cached_locations.json"
+	cacheFilename := filepath.Join(shared.Program.ResourcesDirectory, "cached_locations.json")
 	cachedLocations := make(map[string]shared.LatLong)
 	loadCacheFromFile(cacheFilename, cachedLocations)
 	jobs = standardizeLocations(jobs)
@@ -29,6 +30,10 @@ func ProcessLatLongs(jobs []shared.JobData, progressBar *widget.ProgressBar) []s
 }
 
 func loadCacheFromFile(filename string, cachedLocations map[string]shared.LatLong) {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return
+	}
+
 	file, err := os.Open(filename)
 	shared.CheckErrorWarn(err)
 	defer func() {
