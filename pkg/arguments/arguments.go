@@ -1,4 +1,4 @@
-package headless
+package arguments
 
 import (
 	"flag"
