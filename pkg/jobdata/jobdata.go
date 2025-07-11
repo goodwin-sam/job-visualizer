@@ -6,6 +6,9 @@ import (
 )
 
 func ProcessRows(rows [][]string, allJobData []shared.JobData) []shared.JobData {
+	if len(rows) < 2 {
+		return allJobData
+	}
 	for _, row := range rows[1:] {
 		if len(row) < 10 {
 			continue
@@ -22,15 +25,6 @@ func ProcessRows(rows [][]string, allJobData []shared.JobData) []shared.JobData 
 	}
 	return allJobData
 }
-
-// func GetJobData(jobs []shared.JobData) []shared.JobData {
-// 	jobs = filter.FilterJobs(jobs)
-// 	// jobs = assignLatLongs(jobs)
-// 	// geoplotMap := createGeoplotMap(jobs)
-// 	// shared.window.Server = createHttpServer(geoplotMap)
-// 	shared.Window.JobDataGui = &jobs
-// 	return jobs
-// }
 
 func calcSalary(row []string) int {
 	maxSalaryString := row[6]
