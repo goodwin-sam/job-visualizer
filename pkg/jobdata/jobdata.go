@@ -35,10 +35,11 @@ func calcSalary(row []string) int {
 	shared.CheckError(err)
 	minSalary, err := strconv.ParseFloat(minSalaryString, 64)
 	shared.CheckError(err)
-	salary := int((maxSalary + minSalary) / 2)
+	salaryFloat := ((maxSalary + minSalary) / 2)
 	if hourlyOrYearly == "hourly" {
-		salary = salary * 40 * 50
+		salaryFloat = salaryFloat * 40 * 50
 	}
+	salary := int(salaryFloat)
 	return salary
 
 }
