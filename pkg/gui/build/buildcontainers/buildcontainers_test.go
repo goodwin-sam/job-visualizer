@@ -4,6 +4,8 @@ import (
 	"job-visualizer/pkg/shared"
 	"strings"
 	"testing"
+
+	"fyne.io/fyne/v2/widget"
 )
 
 func TestFormatJobDetails(t *testing.T) {
@@ -35,6 +37,17 @@ func TestFormatJobDetails(t *testing.T) {
 		"https://testcorp.com/jobs/1",
 	}) {
 		t.Errorf("formatJobDetails output missing expected content: %s", result)
+	}
+}
+
+func TestCreateListItem(t *testing.T) {
+	item := createListItem()
+	label, ok := item.(*widget.Label)
+	if !ok {
+		t.Fatalf("createListItem did not return a *widget.Label, got %T", item)
+	}
+	if label.Text != "list items here" {
+		t.Errorf("Expected label text 'list items here', got '%s'", label.Text)
 	}
 }
 
