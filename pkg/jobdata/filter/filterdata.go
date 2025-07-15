@@ -72,7 +72,10 @@ func filterMinSalary(job shared.JobData, filter string) bool {
 	filterMatch := false
 	salary := job.Salary
 	minSalary, err := strconv.Atoi(filter)
-	shared.CheckErrorWarn(err)
+	if err != nil {
+		shared.CheckErrorWarn(err)
+		return false
+	}
 	if salary > minSalary {
 		filterMatch = true
 	}
