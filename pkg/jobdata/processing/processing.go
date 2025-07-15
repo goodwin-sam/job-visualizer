@@ -47,10 +47,11 @@ func loadCacheFromFile(filename string, cachedLocations map[string]shared.LatLon
 
 func standardizeLocations(jobs []shared.JobData) []shared.JobData {
 	reNumbers := regexp.MustCompile(`[0-9]+`)
-	rePunctuation := regexp.MustCompile(`[^\w\s]`)
+	rePunctuation := regexp.MustCompile(`[^-\w\s]`)
 	for i, job := range jobs {
 		location := job.Location
 		location = strings.ToLower(location)
+		location = strings.ReplaceAll(location, "-", " ")
 		location = reNumbers.ReplaceAllString(location, "")
 		location = rePunctuation.ReplaceAllString(location, "")
 		location = strings.Join(strings.Fields(location), " ")
