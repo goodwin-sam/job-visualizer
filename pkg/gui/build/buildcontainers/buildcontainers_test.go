@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -51,6 +53,67 @@ func TestCreateListItem(t *testing.T) {
 	}
 }
 
+func TestBuildKeywordContainer(t *testing.T) {
+	testFilterContainer(
+		t,
+		buildKeywordContainer,
+		func() { shared.WindowData.KeywordEntryWidget = nil },
+		func(val string) { shared.WindowData.Filters.KeywordEntry = val },
+		func() string { return shared.WindowData.Filters.KeywordEntry },
+		"test-keyword",
+	)
+}
+
+func TestBuildLocationContainer(t *testing.T) {
+	testFilterContainer(
+		t,
+		buildLocationContainer,
+		func() { shared.WindowData.LocationEntryWidget = nil },
+		func(val string) { shared.WindowData.Filters.LocationEntry = val },
+		func() string { return shared.WindowData.Filters.LocationEntry },
+		"test-location",
+	)
+}
+
+func TestBuildMinSalaryContainer(t *testing.T) {
+	testFilterContainer(
+		t,
+		buildMinSalaryContainer,
+		func() { shared.WindowData.MinSalaryEntryWidget = nil },
+		func(val string) { shared.WindowData.Filters.MinSalaryEntry = val },
+		func() string { return shared.WindowData.Filters.MinSalaryEntry },
+		"12345",
+	)
+}
+
+func TestBuildRightSplit(t *testing.T) {
+	container := BuildRightSplit()
+	if container == nil {
+		t.Fatal("Expected non-nil container")
+	}
+
+	objs := container.Objects
+	if len(objs) != 2 {
+		t.Fatalf("Expected 2 objects in container, got %d", len(objs))
+	}
+
+	label, ok := objs[0].(*widget.Label)
+	if !ok {
+		t.Fatalf("First object is not *widget.Label, got %T", objs[0])
+	}
+	if label.Text != "Select a job to display details" {
+		t.Errorf("Expected label text 'Select a job to display details', got '%s'", label.Text)
+	}
+
+	button, ok := objs[1].(*widget.Button)
+	if !ok {
+		t.Fatalf("Second object is not *widget.Button, got %T", objs[1])
+	}
+	if button.Text != "Quit" {
+		t.Errorf("Expected button text 'Quit', got '%s'", button.Text)
+	}
+}
+
 func containsAllSubstrings(output string, requiredSubstrings []string) bool {
 	for _, substring := range requiredSubstrings {
 		if !strings.Contains(output, substring) {
@@ -58,4 +121,37 @@ func containsAllSubstrings(output string, requiredSubstrings []string) bool {
 		}
 	}
 	return true
+}
+
+func testFilterContainer(
+	t *testing.T,
+	buildFunc func() *fyne.Container,
+	resetWidget func(),
+	setFilterValue func(string),
+	getFilterValue func() string,
+	testValue string,
+) {
+	resetWidget()
+	setFilterValue("")
+	container := buildFunc()
+	if container == nil {
+		t.Fatal("Expected non-nil container")
+	}
+	objs := container.Objects
+	if len(objs) != 2 {
+		t.Fatalf("Expected 2 objects in container, got %d", len(objs))
+	}
+	entry, ok := objs[0].(*widget.Entry)
+	if !ok {
+		t.Fatalf("First object is not *widget.Entry, got %T", objs[0])
+	}
+	button, ok := objs[1].(*widget.Button)
+	if !ok {
+		t.Fatalf("Second object is not *widget.Button, got %T", objs[1])
+	}
+	entry.SetText(testValue)
+	test.Tap(button)
+	if getFilterValue() != testValue {
+		t.Errorf("Expected filter to be set to '%s', got '%s'", testValue, getFilterValue())
+	}
 }
