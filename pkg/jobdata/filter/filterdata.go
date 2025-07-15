@@ -12,15 +12,14 @@ func FilterJobs(jobs []shared.JobData) []shared.JobData {
 		filters.WorkFromHomeEntry {
 		var filteredJobs []shared.JobData
 		for _, job := range jobs {
-			filteredJobs = filterIndividualJob(job, filteredJobs)
+			filteredJobs = filterIndividualJob(job, filteredJobs, filters)
 		}
 		return filteredJobs
 	}
 	return jobs
 }
 
-func filterIndividualJob(job shared.JobData, filteredJobs []shared.JobData) []shared.JobData {
-	filters := shared.WindowData.Filters
+func filterIndividualJob(job shared.JobData, filteredJobs []shared.JobData, filters shared.FilterEntries) []shared.JobData {
 	filterMatch := true
 	if filters.KeywordEntry != "" {
 		//fmt.Printf("keyword entered: %s", filters.KeywordEntry)
