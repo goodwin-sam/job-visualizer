@@ -5,13 +5,17 @@ import (
 	"job-visualizer/pkg/shared"
 	"os"
 	"path/filepath"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func CreateDatabase() *sql.DB {
 	databasePath := filepath.Join(shared.Program.OutputDirectory, "job_data.sqlite")
 	err := os.Remove(databasePath)
 	shared.CheckErrorWarn(err)
-	db, err := sql.Open("sqlite", databasePath)
+	db, err := sql.Open("sqlite3", databasePath)
+	shared.CheckError(err)
+	_, err = db.Exec("PRAGMA journal_mode=WAL;")
 	shared.CheckError(err)
 	return db
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -18,7 +19,7 @@ import (
 )
 
 func ProcessLatLongs(jobs []shared.JobData, progressBar *widget.ProgressBar) []shared.JobData {
-	cacheFilename := "cached_locations.json"
+	cacheFilename := filepath.Join(shared.Program.ResourcesDirectory, "cached_locations.json")
 	cachedLocations := make(map[string]shared.LatLong)
 	loadCacheFromFile(cacheFilename, cachedLocations)
 	jobs = standardizeLocations(jobs)
@@ -29,6 +30,10 @@ func ProcessLatLongs(jobs []shared.JobData, progressBar *widget.ProgressBar) []s
 }
 
 func loadCacheFromFile(filename string, cachedLocations map[string]shared.LatLong) {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return
+	}
+
 	file, err := os.Open(filename)
 	shared.CheckErrorWarn(err)
 	defer func() {
@@ -42,10 +47,11 @@ func loadCacheFromFile(filename string, cachedLocations map[string]shared.LatLon
 
 func standardizeLocations(jobs []shared.JobData) []shared.JobData {
 	reNumbers := regexp.MustCompile(`[0-9]+`)
-	rePunctuation := regexp.MustCompile(`[^\w\s]`)
+	rePunctuation := regexp.MustCompile(`[^-\w\s]`)
 	for i, job := range jobs {
 		location := job.Location
 		location = strings.ToLower(location)
+		location = strings.ReplaceAll(location, "-", " ")
 		location = reNumbers.ReplaceAllString(location, "")
 		location = rePunctuation.ReplaceAllString(location, "")
 		location = strings.Join(strings.Fields(location), " ")
