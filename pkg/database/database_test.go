@@ -73,7 +73,9 @@ func createTestJobs() []shared.JobData {
 
 func TestCreateDatabase(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
+	defer func() {
+		shared.CheckErrorWarn(db.Close())
+	}()
 
 	dbPath := filepath.Join(shared.Program.OutputDirectory, "job_data.sqlite")
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
@@ -88,7 +90,9 @@ func TestCreateDatabase(t *testing.T) {
 
 func TestSetupDatabase(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
+	defer func() {
+		shared.CheckErrorWarn(db.Close())
+	}()
 
 	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
 	if err != nil {
@@ -105,7 +109,9 @@ func TestSetupDatabase(t *testing.T) {
 
 func TestWriteToDatabase(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
+	defer func() {
+		shared.CheckErrorWarn(db.Close())
+	}()
 
 	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
 	if err != nil {
@@ -142,7 +148,9 @@ func TestWriteToDatabase(t *testing.T) {
 
 func TestCreateMainTable(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
+	defer func() {
+		shared.CheckErrorWarn(db.Close())
+	}()
 
 	_, err := db.Exec("DROP TABLE IF EXISTS job_data")
 	if err != nil {
@@ -166,7 +174,9 @@ func TestCreateMainTable(t *testing.T) {
 
 func TestCreateSecondaryTables(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
+	defer func() {
+		shared.CheckErrorWarn(db.Close())
+	}()
 
 	createMainTable(db)
 

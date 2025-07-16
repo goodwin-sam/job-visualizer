@@ -13,19 +13,21 @@ func TestOpenExcelFile(t *testing.T) {
 	tempDirectory := t.TempDir()
 	testFile1 := excelize.NewFile()
 	sheet := "Jobs"
-	testFile1.NewSheet(sheet)
+	_, err := testFile1.NewSheet(sheet)
+	shared.CheckErrorWarn(err)
 	_ = testFile1.SetSheetRow(sheet, "A1", &[]string{"Location", "Job Title", "Company Name"})
 	_ = testFile1.SetSheetRow(sheet, "A2", &[]string{"New York", "Software Engineer", "Tech Corp"})
 
 	testFile2 := excelize.NewFile()
-	testFile2.NewSheet(sheet)
+	_, err = testFile2.NewSheet(sheet)
+	shared.CheckErrorWarn(err)
 	_ = testFile2.SetSheetRow(sheet, "A1", &[]string{"Location", "Job Title", "Company Name"})
 	_ = testFile2.SetSheetRow(sheet, "A2", &[]string{"San Francisco", "Data Scientist", "Data Inc."})
 	_ = testFile2.SetSheetRow(sheet, "A3", &[]string{"Los Angeles", "Product Manager", "Creative Solutions"})
 
 	testFile1Path := filepath.Join(tempDirectory, "test1.xlsx")
 	testFile2Path := filepath.Join(tempDirectory, "test2.xlsx")
-	err := testFile1.SaveAs(testFile1Path)
+	err = testFile1.SaveAs(testFile1Path)
 	if err != nil {
 		t.Fatalf("Failed to save test file 1: %v", err)
 	}
@@ -51,7 +53,8 @@ func TestOpenExcelFile(t *testing.T) {
 func TestGetAllRows(t *testing.T) {
 	file := excelize.NewFile()
 	sheet := "Jobs"
-	file.NewSheet(sheet)
+	_, err := file.NewSheet(sheet)
+	shared.CheckErrorWarn(err)
 	_ = file.SetSheetRow(sheet, "A1", &[]string{"Location", "Job Title", "Company Name"})
 	_ = file.SetSheetRow(sheet, "A2", &[]string{"New York", "Software Engineer", "Tech Corp"})
 	_ = file.SetSheetRow(sheet, "A3", &[]string{"San Francisco", "Data Scientist", "Data Inc."})
