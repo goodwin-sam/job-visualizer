@@ -15,7 +15,7 @@ func CreateDatabase() *sql.DB {
 	shared.CheckErrorWarn(err)
 	db, err := sql.Open("sqlite3", databasePath)
 	shared.CheckError(err)
-	_, err = db.Exec("PRAGMA journal_mode=WAL;")
+	_, err = db.Exec("PRAGMA journal_mode=DELETE;")
 	shared.CheckError(err)
 	return db
 }
