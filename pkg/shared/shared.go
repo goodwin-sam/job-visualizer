@@ -34,9 +34,9 @@ type LatLong struct {
 }
 
 type ProgramData struct {
-	InputFiles         []string
-	OutputDirectory    string
-	ResourcesDirectory string
+	InputFiles      []string
+	OutputDirectory string
+	CacheDirectory  string
 }
 
 type GuiWindowData struct {
