@@ -19,7 +19,7 @@ import (
 )
 
 func ProcessLatLongs(jobs []shared.JobData, progressBar *widget.ProgressBar) []shared.JobData {
-	cacheFilename := filepath.Join(shared.Program.ResourcesDirectory, "cached_locations.json")
+	cacheFilename := filepath.Join(shared.Program.CacheDirectory, "cached_locations.json")
 	cachedLocations := make(map[string]shared.LatLong)
 	loadCacheFromFile(cacheFilename, cachedLocations)
 	jobs = standardizeLocations(jobs)
