@@ -35,3 +35,8 @@ cached_locations.json
 
 #todo notes
 todo.txt
+
+#packaging
+releases/
+AppDir/
+appimagetool-x86_64.AppImage
