@@ -10,12 +10,12 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func BuildStartContainer(window fyne.Window, startButton *widget.Button, progressBar *widget.ProgressBar) *fyne.Container {
+func BuildStartContainer(window fyne.Window, startButton *widget.Button, progressBar *widget.ProgressBar, programData *shared.ProgramData) *fyne.Container {
 	startLabel := buildwidgets.BuildLabel("Welcome to job-visualizer, choose your input files and output file location",
 		true, false)
 	inputFileLabel := buildwidgets.BuildLabel("No input files selected", false, false)
 	outputDirectoryLabel := buildwidgets.BuildLabel("No output file selected", false, false)
-	inputFileButton, outputDirectoryButton, quitButton := buildwidgets.BuildStartButtons(window, inputFileLabel, outputDirectoryLabel)
+	inputFileButton, outputDirectoryButton, quitButton := buildwidgets.BuildStartButtons(window, inputFileLabel, outputDirectoryLabel, programData)
 
 	inputFilesBox := container.NewVBox(inputFileLabel, inputFileButton)
 	outputDirectoryBox := container.NewVBox(outputDirectoryLabel, outputDirectoryButton)

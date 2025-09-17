@@ -22,7 +22,7 @@ import (
 
 var application fyne.App
 
-func RunGUIorHeadless(headless bool) {
+func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 	if headless {
 		workingDirectory, err := os.Getwd()
 		shared.CheckErrorWarn(err)
@@ -39,10 +39,10 @@ func RunGUIorHeadless(headless bool) {
 			}
 
 		}
-		shared.Program.InputFiles = inputFiles
-		shared.Program.OutputDirectory = workingDirectory
+		programData.InputFiles = inputFiles
+		programData.OutputDirectory = workingDirectory
 
-		allJobData := processJobs(nil)
+		allJobData := processJobs(programData, nil)
 		for i, job := range allJobData {
 			if i%100 == 0 {
 				fmt.Printf("%-4s | %-25s | %-55s | %-25s\n",
@@ -53,17 +53,17 @@ func RunGUIorHeadless(headless bool) {
 				i+1, job.Location, job.JobTitle, job.CompanyName)
 		}
 	} else {
-		createGuiApp()
+		createGuiApp(programData)
 	}
 }
 
-func createGuiApp() {
+func createGuiApp(programData shared.ProgramData) {
 	application = app.NewWithID("job-visualizer")
 	progressBar := widget.NewProgressBar()
 	progressBar.SetValue(0)
 	startButton := widget.NewButton("Start Application", func() {
 		go func() {
-			allJobData := processJobs(progressBar)
+			allJobData := processJobs(programData, progressBar)
 			fyne.DoAndWait(func() {
 				shared.MainWindow = createGuiWindow("job-visualizer")
 				shared.MainWindow.SetOnClosed(func() { application.Quit() })
@@ -74,7 +74,7 @@ func createGuiApp() {
 		}()
 	})
 	shared.StartWindow = createGuiWindow("job-visualizer")
-	shared.StartWindow = build.BuildStartWindow(shared.StartWindow, startButton, progressBar)
+	shared.StartWindow = build.BuildStartWindow(shared.StartWindow, startButton, progressBar, &programData)
 	shared.StartWindow.ShowAndRun()
 }
 
@@ -84,18 +84,18 @@ func createGuiWindow(title string) fyne.Window {
 	return Window
 }
 
-func processJobs(progressBar *widget.ProgressBar) []shared.JobData {
-	files := excel.OpenExcelFile()
+func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar) []shared.JobData {
+	files := excel.OpenExcelFile(programData.InputFiles)
 	rows := excel.GetAllRows(files)
 	allJobData := jobdata.ProcessRows(rows, []shared.JobData{})
 	if progressBar != nil {
-		allJobData = processing.ProcessLatLongs(allJobData, progressBar)
+		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, progressBar)
 	} else {
-		allJobData = processing.ProcessLatLongs(allJobData, nil)
+		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
 	}
 	allJobData = mapping.GenerateMap(allJobData)
 
-	jobsDatabase := database.CreateDatabase()
+	jobsDatabase := database.CreateDatabase(programData.OutputDirectory)
 	database.SetupDatabase(jobsDatabase)
 	database.WriteToDatabase(jobsDatabase, allJobData)
 	return allJobData

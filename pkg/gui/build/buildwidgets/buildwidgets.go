@@ -25,7 +25,7 @@ func BuildMainButtons(jobs []shared.JobData) (*widget.Button, *widget.Button, *w
 	return refreshButton, filterButton, selectedDetailsButton
 }
 
-func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputDirectoryLabel *widget.Label) (*widget.Button, *widget.Button, *widget.Button) {
+func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputDirectoryLabel *widget.Label, programData *shared.ProgramData) (*widget.Button, *widget.Button, *widget.Button) {
 	inputFileButton := widget.NewButton("Select Input Files", func() {
 		inputFileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			shared.CheckErrorWarn(err)
@@ -37,8 +37,8 @@ func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputD
 				err = reader.Close()
 				shared.CheckErrorWarn(err)
 			}()
-			shared.Program.InputFiles = append(shared.Program.InputFiles, reader.URI().Path())
-			selectedFiles := strings.Join(shared.Program.InputFiles, "\n")
+			programData.InputFiles = append(programData.InputFiles, reader.URI().Path())
+			selectedFiles := strings.Join(programData.InputFiles, "\n")
 			inputFileLabel.SetText(selectedFiles)
 
 		}, window)
@@ -51,8 +51,8 @@ func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputD
 				println("user cancelled directory selection")
 				return
 			}
-			shared.Program.OutputDirectory = uri.Path()
-			outputDirectoryLabel.SetText(shared.Program.OutputDirectory)
+			programData.OutputDirectory = uri.Path()
+			outputDirectoryLabel.SetText(programData.OutputDirectory)
 		}, window)
 		outputDirectoryDialog.Show()
 	})
