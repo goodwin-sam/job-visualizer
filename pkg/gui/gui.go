@@ -66,11 +66,11 @@ func createGuiApp(programData shared.ProgramData) {
 		go func() {
 			allJobData := processJobs(programData, progressBar)
 			fyne.DoAndWait(func() {
-				shared.MainWindow = createGuiWindow("job-visualizer")
-				shared.MainWindow.SetOnClosed(func() { application.Quit() })
-				shared.MainWindow = build.BuildMainWindow(shared.MainWindow, allJobData, windowData)
+				mainWindow := createGuiWindow("job-visualizer")
+				mainWindow.SetOnClosed(func() { application.Quit() })
+				mainWindow = build.BuildMainWindow(mainWindow, allJobData, windowData)
 				startWindow.Hide()
-				shared.MainWindow.Show()
+				mainWindow.Show()
 			})
 		}()
 	})
