@@ -24,9 +24,9 @@ func BuildStartContainer(window fyne.Window, startButton *widget.Button, progres
 	return container.NewVBox(startLabel, inputOutputContainers, startButton, quitButton)
 }
 
-func BuildLeftSplit(jobs []shared.JobData, windowData *shared.GuiWindowData) *container.Split {
+func BuildLeftSplit(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) *container.Split {
 	createJobList(windowData)
-	refreshButton, filterButton, selectedDetailsButton := buildwidgets.BuildMainButtons(jobs, windowData)
+	refreshButton, filterButton, selectedDetailsButton := buildwidgets.BuildMainButtons(jobs, windowData, mappingService)
 	selectedDetailsLabel := buildwidgets.BuildLabel("Select a job and click button to display details",
 		true, false)
 

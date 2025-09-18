@@ -15,14 +15,14 @@ func BuildStartWindow(window fyne.Window, startButton *widget.Button, progressBa
 	return window
 }
 
-func BuildMainWindow(window fyne.Window, jobs []shared.JobData, windowData *shared.GuiWindowData) fyne.Window {
-	contentPane := buildMainContent(jobs, windowData)
+func BuildMainWindow(window fyne.Window, jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) fyne.Window {
+	contentPane := buildMainContent(jobs, windowData, mappingService)
 	window.SetContent(contentPane)
 	return window
 }
 
-func buildMainContent(jobs []shared.JobData, windowData *shared.GuiWindowData) *container.Split {
-	leftSplit := buildcontainers.BuildLeftSplit(jobs, windowData)
+func buildMainContent(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) *container.Split {
+	leftSplit := buildcontainers.BuildLeftSplit(jobs, windowData, mappingService)
 	rightSplit := buildcontainers.BuildRightSplit(windowData)
 	contentPane := container.NewHSplit(leftSplit, rightSplit)
 

@@ -9,15 +9,16 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-var geoplotMap *geoplot.Map
-
-func init() {
-	http.HandleFunc("/map", mapPage)
-	http.HandleFunc("/innerMap", innerMap)
+type MappingService struct {
+	geoplotMap *geoplot.Map
 }
 
-func mapPage(writer http.ResponseWriter, request *http.Request) {
-	if geoplotMap != nil {
+func NewMappingService() *MappingService {
+	return &MappingService{}
+}
+
+func (ms *MappingService) mapPage(writer http.ResponseWriter, request *http.Request) {
+	if ms.geoplotMap != nil {
 		writer.Header().Set("Content-Type", "text/html")
 		_, err := fmt.Fprint(writer, `
             <html>
@@ -35,30 +36,30 @@ func mapPage(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func innerMap(writer http.ResponseWriter, request *http.Request) {
-	if geoplotMap != nil {
-		err := geoplot.ServeMap(writer, request, geoplotMap)
+func (ms *MappingService) innerMap(writer http.ResponseWriter, request *http.Request) {
+	if ms.geoplotMap != nil {
+		err := geoplot.ServeMap(writer, request, ms.geoplotMap)
 		shared.CheckErrorWarn(err)
 	} else {
 		http.Error(writer, "Map not ready", http.StatusServiceUnavailable)
 	}
 }
 
-func GenerateMap(jobs []shared.JobData, windowData *shared.GuiWindowData) []shared.JobData {
-	geoplotMap = createGeoplotMap(jobs)
-	windowData.Server = createHttpServer(windowData)
+func (ms *MappingService) GenerateMap(jobs []shared.JobData, windowData *shared.GuiWindowData) []shared.JobData {
+	ms.geoplotMap = ms.createGeoplotMap(jobs)
+	windowData.Server = ms.createHttpServer(windowData)
 	openWebpage()
 	return jobs
 }
 
-func createGeoplotMap(jobs []shared.JobData) *geoplot.Map {
-	geoplotMap := createBaseMap()
-	createMarkers(jobs, geoplotMap)
+func (ms *MappingService) createGeoplotMap(jobs []shared.JobData) *geoplot.Map {
+	geoplotMap := ms.createBaseMap()
+	ms.createMarkers(jobs, geoplotMap)
 
 	return geoplotMap
 }
 
-func createBaseMap() *geoplot.Map {
+func (ms *MappingService) createBaseMap() *geoplot.Map {
 	boston := &geoplot.LatLng{
 		Latitude:  42.361145,
 		Longitude: -71.057083,
@@ -74,7 +75,7 @@ func createBaseMap() *geoplot.Map {
 	return geoplotMap
 }
 
-func createMarkers(jobs []shared.JobData, geoplotMap *geoplot.Map) {
+func (ms *MappingService) createMarkers(jobs []shared.JobData, geoplotMap *geoplot.Map) {
 	commonLocations := make(map[shared.LatLong][]shared.JobData)
 	for _, job := range jobs {
 		if _, ok := commonLocations[job.LatLong]; ok {
@@ -133,12 +134,17 @@ func displayDescription(markerJobs []shared.JobData) string {
 	return description
 }
 
-func createHttpServer(windowData *shared.GuiWindowData) *http.Server {
+func (ms *MappingService) createHttpServer(windowData *shared.GuiWindowData) *http.Server {
 	if windowData.Server != nil {
 		err := windowData.Server.Close()
 		shared.CheckErrorWarn(err)
 	}
-	server := &http.Server{Addr: ":8080"}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/map", ms.mapPage)
+	mux.HandleFunc("/innerMap", ms.innerMap)
+
+	server := &http.Server{Addr: ":8080", Handler: mux}
 	go func() {
 		err := server.ListenAndServe()
 		shared.CheckErrorWarn(err)

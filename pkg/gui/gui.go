@@ -7,6 +7,7 @@ import (
 	"job-visualizer/pkg/gui/build"
 	"job-visualizer/pkg/jobdata"
 	"job-visualizer/pkg/jobdata/processing"
+	"job-visualizer/pkg/mapping"
 	"job-visualizer/pkg/shared"
 	"os"
 	"path/filepath"
@@ -39,7 +40,7 @@ func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 		programData.InputFiles = inputFiles
 		programData.OutputDirectory = workingDirectory
 
-		allJobData := processJobs(programData, nil)
+		allJobData := processJobs(programData, nil, mapping.NewMappingService())
 		for i, job := range allJobData {
 			if i%100 == 0 {
 				fmt.Printf("%-4s | %-25s | %-55s | %-25s\n",
@@ -59,14 +60,15 @@ func createGuiApp(programData shared.ProgramData) {
 	progressBar := widget.NewProgressBar()
 	progressBar.SetValue(0)
 	windowData := &shared.GuiWindowData{}
+	mappingService := mapping.NewMappingService()
 	startWindow := createGuiWindow(application, "job-visualizer")
 	startButton := widget.NewButton("Start Application", func() {
 		go func() {
-			allJobData := processJobs(programData, progressBar)
+			allJobData := processJobs(programData, progressBar, mappingService)
 			fyne.DoAndWait(func() {
 				mainWindow := createGuiWindow(application, "job-visualizer")
 				mainWindow.SetOnClosed(func() { application.Quit() })
-				mainWindow = build.BuildMainWindow(mainWindow, allJobData, windowData)
+				mainWindow = build.BuildMainWindow(mainWindow, allJobData, windowData, mappingService)
 				startWindow.Hide()
 				mainWindow.Show()
 			})
@@ -82,7 +84,7 @@ func createGuiWindow(app fyne.App, title string) fyne.Window {
 	return Window
 }
 
-func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar) []shared.JobData {
+func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar, mappingService *mapping.MappingService) []shared.JobData {
 	files := excel.OpenExcelFile(programData.InputFiles)
 	rows := excel.GetAllRows(files)
 	allJobData := jobdata.ProcessRows(rows, []shared.JobData{})
@@ -91,6 +93,7 @@ func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar
 	} else {
 		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
 	}
+	allJobData = mappingService.GenerateMap(allJobData, &shared.GuiWindowData{})
 	jobsDatabase := database.CreateDatabase(programData.OutputDirectory)
 	database.SetupDatabase(jobsDatabase)
 	database.WriteToDatabase(jobsDatabase, allJobData)

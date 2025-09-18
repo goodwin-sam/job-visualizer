@@ -11,12 +11,12 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func BuildMainButtons(jobs []shared.JobData, windowData *shared.GuiWindowData) (*widget.Button, *widget.Button, *widget.Button) {
+func BuildMainButtons(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) (*widget.Button, *widget.Button, *widget.Button) {
 	refreshButton := widget.NewButton("Click to refresh list of jobs to original", func() {
-		handleJobRefresh(jobs, windowData)
+		handleJobRefresh(jobs, windowData, mappingService)
 	})
 	filterButton := widget.NewButton("Click to filter the jobs", func() {
-		handleJobFilter(jobs, windowData)
+		handleJobFilter(jobs, windowData, mappingService)
 	})
 	selectedDetailsButton := widget.NewButton("Click to display selected job details", func() {
 		windowData.DetailsWidget.SetText(windowData.SelectedJobDetails)
@@ -80,17 +80,21 @@ func BuildQuitButton() *widget.Button {
 	return widget.NewButton("Quit", func() { fyne.CurrentApp().Quit() })
 }
 
-func handleJobRefresh(jobs []shared.JobData, windowData *shared.GuiWindowData) {
+func handleJobRefresh(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) {
 	removeActiveFilters(windowData)
 	filteredJobs := filter.FilterJobs(jobs, windowData.Filters)
-	mapping.GenerateMap(filteredJobs, windowData)
+	if ms, ok := mappingService.(*mapping.MappingService); ok {
+		ms.GenerateMap(filteredJobs, windowData)
+	}
 	windowData.FilteredJobs = &filteredJobs
 	refreshEntries(windowData)
 }
 
-func handleJobFilter(jobs []shared.JobData, windowData *shared.GuiWindowData) {
+func handleJobFilter(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) {
 	filteredJobs := filter.FilterJobs(jobs, windowData.Filters)
-	mapping.GenerateMap(filteredJobs, windowData)
+	if ms, ok := mappingService.(*mapping.MappingService); ok {
+		ms.GenerateMap(filteredJobs, windowData)
+	}
 	windowData.FilteredJobs = &filteredJobs
 }
 
