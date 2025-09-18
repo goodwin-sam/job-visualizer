@@ -10,7 +10,6 @@ import (
 )
 
 var Program ProgramData
-var StartWindow fyne.Window
 var MainWindow fyne.Window
 
 type JobData struct {

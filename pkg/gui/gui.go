@@ -61,6 +61,7 @@ func createGuiApp(programData shared.ProgramData) {
 	progressBar := widget.NewProgressBar()
 	progressBar.SetValue(0)
 	windowData := &shared.GuiWindowData{}
+	startWindow := createGuiWindow("job-visualizer")
 	startButton := widget.NewButton("Start Application", func() {
 		go func() {
 			allJobData := processJobs(programData, progressBar)
@@ -68,14 +69,13 @@ func createGuiApp(programData shared.ProgramData) {
 				shared.MainWindow = createGuiWindow("job-visualizer")
 				shared.MainWindow.SetOnClosed(func() { application.Quit() })
 				shared.MainWindow = build.BuildMainWindow(shared.MainWindow, allJobData, windowData)
-				shared.StartWindow.Hide()
+				startWindow.Hide()
 				shared.MainWindow.Show()
 			})
 		}()
 	})
-	shared.StartWindow = createGuiWindow("job-visualizer")
-	shared.StartWindow = build.BuildStartWindow(shared.StartWindow, startButton, progressBar, &programData)
-	shared.StartWindow.ShowAndRun()
+	startWindow = build.BuildStartWindow(startWindow, startButton, progressBar, &programData)
+	startWindow.ShowAndRun()
 }
 
 func createGuiWindow(title string) fyne.Window {
