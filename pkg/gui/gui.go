@@ -19,8 +19,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var application fyne.App
-
 func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 	if headless {
 		workingDirectory, err := os.Getwd()
@@ -57,16 +55,16 @@ func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 }
 
 func createGuiApp(programData shared.ProgramData) {
-	application = app.NewWithID("job-visualizer")
+	application := app.NewWithID("job-visualizer")
 	progressBar := widget.NewProgressBar()
 	progressBar.SetValue(0)
 	windowData := &shared.GuiWindowData{}
-	startWindow := createGuiWindow("job-visualizer")
+	startWindow := createGuiWindow(application, "job-visualizer")
 	startButton := widget.NewButton("Start Application", func() {
 		go func() {
 			allJobData := processJobs(programData, progressBar)
 			fyne.DoAndWait(func() {
-				mainWindow := createGuiWindow("job-visualizer")
+				mainWindow := createGuiWindow(application, "job-visualizer")
 				mainWindow.SetOnClosed(func() { application.Quit() })
 				mainWindow = build.BuildMainWindow(mainWindow, allJobData, windowData)
 				startWindow.Hide()
@@ -78,8 +76,8 @@ func createGuiApp(programData shared.ProgramData) {
 	startWindow.ShowAndRun()
 }
 
-func createGuiWindow(title string) fyne.Window {
-	Window := application.NewWindow(title)
+func createGuiWindow(app fyne.App, title string) fyne.Window {
+	Window := app.NewWindow(title)
 	Window.Resize(fyne.NewSize(1000, 600))
 	return Window
 }
@@ -93,7 +91,6 @@ func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar
 	} else {
 		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
 	}
-	// Note: mapping.GenerateMap will be called from the GUI with windowData
 	jobsDatabase := database.CreateDatabase(programData.OutputDirectory)
 	database.SetupDatabase(jobsDatabase)
 	database.WriteToDatabase(jobsDatabase, allJobData)
