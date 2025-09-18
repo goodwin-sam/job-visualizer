@@ -294,8 +294,7 @@ func TestFilterJobs(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			shared.WindowData.Filters = c.filters
-			result := FilterJobs(jobs)
+			result := FilterJobs(jobs, c.filters)
 			var expected []shared.JobData
 			for _, idx := range c.expectIdx {
 				expected = append(expected, jobs[idx])

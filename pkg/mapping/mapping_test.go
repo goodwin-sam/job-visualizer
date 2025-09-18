@@ -118,7 +118,8 @@ func assertMapNotNil(t *testing.T, m *geoplot.Map) {
 }
 
 func TestCreateBaseMap(t *testing.T) {
-	m := createBaseMap()
+	ms := NewMappingService()
+	m := ms.createBaseMap()
 	assertMapNotNil(t, m)
 	if m.Center == nil || m.Center.Latitude != 42.361145 || m.Center.Longitude != -71.057083 {
 		t.Errorf("Center = %+v, want Latitude=42.361145, Longitude=-71.057083", m.Center)
@@ -138,8 +139,9 @@ func TestCreateBaseMap(t *testing.T) {
 }
 
 func TestCreateGeoplotMap(t *testing.T) {
+	ms := NewMappingService()
 	jobs := []shared.JobData{}
-	m := createGeoplotMap(jobs)
+	m := ms.createGeoplotMap(jobs)
 	assertMapNotNil(t, m)
 }
 

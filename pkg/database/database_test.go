@@ -12,8 +12,7 @@ import (
 
 func setupTestDB(t *testing.T) *sql.DB {
 	tempDirectory := t.TempDir()
-	shared.Program.OutputDirectory = tempDirectory
-	db := CreateDatabase()
+	db := CreateDatabase(tempDirectory)
 	if db == nil {
 		t.Fatal("Expected database, got nil")
 	}
@@ -72,12 +71,13 @@ func createTestJobs() []shared.JobData {
 }
 
 func TestCreateDatabase(t *testing.T) {
-	db := setupTestDB(t)
+	tempDirectory := t.TempDir()
+	db := CreateDatabase(tempDirectory)
 	defer func() {
 		shared.CheckErrorWarn(db.Close())
 	}()
 
-	dbPath := filepath.Join(shared.Program.OutputDirectory, "job_data.sqlite")
+	dbPath := filepath.Join(tempDirectory, "job_data.sqlite")
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		t.Errorf("Expected database file to exist at %s, but it does not", dbPath)
 	}

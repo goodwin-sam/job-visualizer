@@ -13,8 +13,9 @@ func TestBuildStartWindow(t *testing.T) {
 	window := test.NewWindow(nil)
 	startButton := widget.NewButton("Start", nil)
 	progressBar := widget.NewProgressBar()
+	programData := &shared.ProgramData{}
 
-	resultWindow := BuildStartWindow(window, startButton, progressBar)
+	resultWindow := BuildStartWindow(window, startButton, progressBar, programData)
 
 	if resultWindow != window {
 		t.Errorf("Expected returned window to be the same as input window")
@@ -28,8 +29,9 @@ func TestBuildStartWindow(t *testing.T) {
 func TestBuildMainWindow(t *testing.T) {
 	window := test.NewWindow(nil)
 	jobs := []shared.JobData{} // empty slice for simplicity
+	windowData := &shared.GuiWindowData{}
 
-	resultWindow := BuildMainWindow(window, jobs)
+	resultWindow := BuildMainWindow(window, jobs, windowData, nil)
 
 	if resultWindow != window {
 		t.Errorf("Expected returned window to be the same as input window")
@@ -42,8 +44,9 @@ func TestBuildMainWindow(t *testing.T) {
 
 func TestBuildMainContent(t *testing.T) {
 	jobs := []shared.JobData{}
+	windowData := &shared.GuiWindowData{}
 
-	contentPane := buildMainContent(jobs)
+	contentPane := buildMainContent(jobs, windowData, nil)
 
 	if contentPane == nil {
 		t.Errorf("Expected contentPane to be non-nil")

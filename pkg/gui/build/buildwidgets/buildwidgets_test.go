@@ -41,38 +41,40 @@ func TestBuildLabel(t *testing.T) {
 }
 
 func TestRemoveActiveFilters(t *testing.T) {
-	shared.WindowData.Filters.KeywordEntry = "developer"
-	shared.WindowData.Filters.LocationEntry = "remote"
-	shared.WindowData.Filters.MinSalaryEntry = "100000"
-	shared.WindowData.Filters.WorkFromHomeEntry = true
+	windowData := &shared.GuiWindowData{}
+	windowData.Filters.KeywordEntry = "developer"
+	windowData.Filters.LocationEntry = "remote"
+	windowData.Filters.MinSalaryEntry = "100000"
+	windowData.Filters.WorkFromHomeEntry = true
 
-	removeActiveFilters()
+	removeActiveFilters(windowData)
 
-	if shared.WindowData.Filters.KeywordEntry != "" {
-		t.Errorf("expected KeywordEntry to be reset, got %q", shared.WindowData.Filters.KeywordEntry)
+	if windowData.Filters.KeywordEntry != "" {
+		t.Errorf("expected KeywordEntry to be reset, got %q", windowData.Filters.KeywordEntry)
 	}
-	if shared.WindowData.Filters.LocationEntry != "" {
-		t.Errorf("expected LocationEntry to be reset, got %q", shared.WindowData.Filters.LocationEntry)
+	if windowData.Filters.LocationEntry != "" {
+		t.Errorf("expected LocationEntry to be reset, got %q", windowData.Filters.LocationEntry)
 	}
-	if shared.WindowData.Filters.MinSalaryEntry != "" {
-		t.Errorf("expected MinSalaryEntry to be reset, got %q", shared.WindowData.Filters.MinSalaryEntry)
+	if windowData.Filters.MinSalaryEntry != "" {
+		t.Errorf("expected MinSalaryEntry to be reset, got %q", windowData.Filters.MinSalaryEntry)
 	}
-	if shared.WindowData.Filters.WorkFromHomeEntry != false {
-		t.Errorf("expected WorkFromHomeEntry to be reset to false, got %v", shared.WindowData.Filters.WorkFromHomeEntry)
+	if windowData.Filters.WorkFromHomeEntry != false {
+		t.Errorf("expected WorkFromHomeEntry to be reset to false, got %v", windowData.Filters.WorkFromHomeEntry)
 	}
 }
 
 func TestBuildRemoteCheckbox(t *testing.T) {
-	shared.WindowData.Filters.WorkFromHomeEntry = false
-	cb := BuildRemoteCheckbox()
+	windowData := &shared.GuiWindowData{}
+	windowData.Filters.WorkFromHomeEntry = false
+	cb := BuildRemoteCheckbox(windowData)
 
 	cb.OnChanged(true)
-	if shared.WindowData.Filters.WorkFromHomeEntry != true {
-		t.Errorf("expected WorkFromHomeEntry to be true after checking, got %v", shared.WindowData.Filters.WorkFromHomeEntry)
+	if windowData.Filters.WorkFromHomeEntry != true {
+		t.Errorf("expected WorkFromHomeEntry to be true after checking, got %v", windowData.Filters.WorkFromHomeEntry)
 	}
 
 	cb.OnChanged(false)
-	if shared.WindowData.Filters.WorkFromHomeEntry != false {
-		t.Errorf("expected WorkFromHomeEntry to be false after unchecking, got %v", shared.WindowData.Filters.WorkFromHomeEntry)
+	if windowData.Filters.WorkFromHomeEntry != false {
+		t.Errorf("expected WorkFromHomeEntry to be false after unchecking, got %v", windowData.Filters.WorkFromHomeEntry)
 	}
 }
