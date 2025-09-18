@@ -18,8 +18,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func ProcessLatLongs(jobs []shared.JobData, progressBar *widget.ProgressBar) []shared.JobData {
-	cacheFilename := filepath.Join(shared.Program.CacheDirectory, "cached_locations.json")
+func ProcessLatLongs(jobs []shared.JobData, cacheDirectory string, progressBar *widget.ProgressBar) []shared.JobData {
+	cacheFilename := filepath.Join(cacheDirectory, "cached_locations.json")
 	cachedLocations := make(map[string]shared.LatLong)
 	loadCacheFromFile(cacheFilename, cachedLocations)
 	jobs = standardizeLocations(jobs)

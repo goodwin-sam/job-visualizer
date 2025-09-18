@@ -6,9 +6,9 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func OpenExcelFile() []*excelize.File {
+func OpenExcelFile(inputFiles []string) []*excelize.File {
 	var allFiles []*excelize.File
-	for _, filePath := range shared.Program.InputFiles {
+	for _, filePath := range inputFiles {
 		file, err := excelize.OpenFile(filePath)
 		shared.CheckError(err)
 		allFiles = append(allFiles, file)

@@ -35,9 +35,9 @@ func TestOpenExcelFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to save test file 2: %v", err)
 	}
-	shared.Program.InputFiles = []string{testFile1Path, testFile2Path}
+	inputFiles := []string{testFile1Path, testFile2Path}
 
-	files := OpenExcelFile()
+	files := OpenExcelFile(inputFiles)
 
 	if len(files) != 2 {
 		t.Fatalf("Expected 2 files, got %d", len(files))

@@ -5,14 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 )
 
-var WindowData GuiWindowData
 var Program ProgramData
-var StartWindow fyne.Window
-var MainWindow fyne.Window
 
 type JobData struct {
 	Location             string

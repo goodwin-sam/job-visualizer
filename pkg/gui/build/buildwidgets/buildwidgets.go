@@ -11,21 +11,21 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func BuildMainButtons(jobs []shared.JobData) (*widget.Button, *widget.Button, *widget.Button) {
+func BuildMainButtons(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) (*widget.Button, *widget.Button, *widget.Button) {
 	refreshButton := widget.NewButton("Click to refresh list of jobs to original", func() {
-		handleJobRefresh(jobs)
+		handleJobRefresh(jobs, windowData, mappingService)
 	})
 	filterButton := widget.NewButton("Click to filter the jobs", func() {
-		handleJobFilter(jobs)
+		handleJobFilter(jobs, windowData, mappingService)
 	})
 	selectedDetailsButton := widget.NewButton("Click to display selected job details", func() {
-		shared.WindowData.DetailsWidget.SetText(shared.WindowData.SelectedJobDetails)
+		windowData.DetailsWidget.SetText(windowData.SelectedJobDetails)
 	})
 
 	return refreshButton, filterButton, selectedDetailsButton
 }
 
-func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputDirectoryLabel *widget.Label) (*widget.Button, *widget.Button, *widget.Button) {
+func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputDirectoryLabel *widget.Label, programData *shared.ProgramData) (*widget.Button, *widget.Button, *widget.Button) {
 	inputFileButton := widget.NewButton("Select Input Files", func() {
 		inputFileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 			shared.CheckErrorWarn(err)
@@ -37,8 +37,8 @@ func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputD
 				err = reader.Close()
 				shared.CheckErrorWarn(err)
 			}()
-			shared.Program.InputFiles = append(shared.Program.InputFiles, reader.URI().Path())
-			selectedFiles := strings.Join(shared.Program.InputFiles, "\n")
+			programData.InputFiles = append(programData.InputFiles, reader.URI().Path())
+			selectedFiles := strings.Join(programData.InputFiles, "\n")
 			inputFileLabel.SetText(selectedFiles)
 
 		}, window)
@@ -51,8 +51,8 @@ func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputD
 				println("user cancelled directory selection")
 				return
 			}
-			shared.Program.OutputDirectory = uri.Path()
-			outputDirectoryLabel.SetText(shared.Program.OutputDirectory)
+			programData.OutputDirectory = uri.Path()
+			outputDirectoryLabel.SetText(programData.OutputDirectory)
 		}, window)
 		outputDirectoryDialog.Show()
 	})
@@ -65,12 +65,12 @@ func BuildLabel(text string, boldBool bool, italicBool bool) *widget.Label {
 		fyne.TextStyle{Bold: boldBool, Italic: italicBool})
 }
 
-func BuildRemoteCheckbox() *widget.Check {
+func BuildRemoteCheckbox(windowData *shared.GuiWindowData) *widget.Check {
 	remoteCheckbox := widget.NewCheck("Remote Work: check for yes, uncheck for all", func(checked bool) {
 		if checked {
-			shared.WindowData.Filters.WorkFromHomeEntry = true
+			windowData.Filters.WorkFromHomeEntry = true
 		} else {
-			shared.WindowData.Filters.WorkFromHomeEntry = false
+			windowData.Filters.WorkFromHomeEntry = false
 		}
 	})
 	return remoteCheckbox
@@ -80,32 +80,36 @@ func BuildQuitButton() *widget.Button {
 	return widget.NewButton("Quit", func() { fyne.CurrentApp().Quit() })
 }
 
-func handleJobRefresh(jobs []shared.JobData) {
-	removeActiveFilters()
-	filteredJobs := filter.FilterJobs(jobs)
-	mapping.GenerateMap(filteredJobs)
-	shared.WindowData.FilteredJobs = &filteredJobs
-	refreshEntries()
+func handleJobRefresh(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) {
+	removeActiveFilters(windowData)
+	filteredJobs := filter.FilterJobs(jobs, windowData.Filters)
+	if ms, ok := mappingService.(*mapping.MappingService); ok {
+		ms.GenerateMap(filteredJobs, windowData)
+	}
+	windowData.FilteredJobs = &filteredJobs
+	refreshEntries(windowData)
 }
 
-func handleJobFilter(jobs []shared.JobData) {
-	filteredJobs := filter.FilterJobs(jobs)
-	mapping.GenerateMap(filteredJobs)
-	shared.WindowData.FilteredJobs = &filteredJobs
+func handleJobFilter(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) {
+	filteredJobs := filter.FilterJobs(jobs, windowData.Filters)
+	if ms, ok := mappingService.(*mapping.MappingService); ok {
+		ms.GenerateMap(filteredJobs, windowData)
+	}
+	windowData.FilteredJobs = &filteredJobs
 }
 
-func removeActiveFilters() {
-	shared.WindowData.Filters.KeywordEntry = ""
-	shared.WindowData.Filters.LocationEntry = ""
-	shared.WindowData.Filters.MinSalaryEntry = ""
-	shared.WindowData.Filters.WorkFromHomeEntry = false
+func removeActiveFilters(windowData *shared.GuiWindowData) {
+	windowData.Filters.KeywordEntry = ""
+	windowData.Filters.LocationEntry = ""
+	windowData.Filters.MinSalaryEntry = ""
+	windowData.Filters.WorkFromHomeEntry = false
 }
 
-func refreshEntries() {
-	shared.WindowData.KeywordEntryWidget.SetText("")
-	shared.WindowData.LocationEntryWidget.SetText("")
-	shared.WindowData.MinSalaryEntryWidget.SetText("")
-	shared.WindowData.KeywordEntryWidget.SetPlaceHolder("Enter keyword filter here")
-	shared.WindowData.LocationEntryWidget.SetPlaceHolder("Enter location filter here")
-	shared.WindowData.MinSalaryEntryWidget.SetPlaceHolder("Enter minimum salary filter here")
+func refreshEntries(windowData *shared.GuiWindowData) {
+	windowData.KeywordEntryWidget.SetText("")
+	windowData.LocationEntryWidget.SetText("")
+	windowData.MinSalaryEntryWidget.SetText("")
+	windowData.KeywordEntryWidget.SetPlaceHolder("Enter keyword filter here")
+	windowData.LocationEntryWidget.SetPlaceHolder("Enter location filter here")
+	windowData.MinSalaryEntryWidget.SetPlaceHolder("Enter minimum salary filter here")
 }

@@ -10,9 +10,11 @@ import (
 )
 
 func main() {
-	shared.Program.CacheDirectory = getAppCacheDirectory()
+	programData := shared.ProgramData{
+		CacheDirectory: getAppCacheDirectory(),
+	}
 	isHeadless := arguments.CheckCLIArguments()
-	gui.RunGUIorHeadless(isHeadless)
+	gui.RunGUIorHeadless(programData, isHeadless)
 }
 
 func getAppCacheDirectory() string {

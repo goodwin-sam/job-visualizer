@@ -9,8 +9,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func CreateDatabase() *sql.DB {
-	databasePath := filepath.Join(shared.Program.OutputDirectory, "job_data.sqlite")
+func CreateDatabase(outputDirectory string) *sql.DB {
+	databasePath := filepath.Join(outputDirectory, "job_data.sqlite")
 	err := os.Remove(databasePath)
 	shared.CheckErrorWarn(err)
 	db, err := sql.Open("sqlite3", databasePath)

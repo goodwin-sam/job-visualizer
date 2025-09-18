@@ -57,9 +57,9 @@ func TestBuildKeywordContainer(t *testing.T) {
 	testFilterContainer(
 		t,
 		buildKeywordContainer,
-		func() { shared.WindowData.KeywordEntryWidget = nil },
-		func(val string) { shared.WindowData.Filters.KeywordEntry = val },
-		func() string { return shared.WindowData.Filters.KeywordEntry },
+		func(wd *shared.GuiWindowData) { wd.KeywordEntryWidget = nil },
+		func(wd *shared.GuiWindowData, val string) { wd.Filters.KeywordEntry = val },
+		func(wd *shared.GuiWindowData) string { return wd.Filters.KeywordEntry },
 		"test-keyword",
 	)
 }
@@ -68,9 +68,9 @@ func TestBuildLocationContainer(t *testing.T) {
 	testFilterContainer(
 		t,
 		buildLocationContainer,
-		func() { shared.WindowData.LocationEntryWidget = nil },
-		func(val string) { shared.WindowData.Filters.LocationEntry = val },
-		func() string { return shared.WindowData.Filters.LocationEntry },
+		func(wd *shared.GuiWindowData) { wd.LocationEntryWidget = nil },
+		func(wd *shared.GuiWindowData, val string) { wd.Filters.LocationEntry = val },
+		func(wd *shared.GuiWindowData) string { return wd.Filters.LocationEntry },
 		"test-location",
 	)
 }
@@ -79,15 +79,16 @@ func TestBuildMinSalaryContainer(t *testing.T) {
 	testFilterContainer(
 		t,
 		buildMinSalaryContainer,
-		func() { shared.WindowData.MinSalaryEntryWidget = nil },
-		func(val string) { shared.WindowData.Filters.MinSalaryEntry = val },
-		func() string { return shared.WindowData.Filters.MinSalaryEntry },
+		func(wd *shared.GuiWindowData) { wd.MinSalaryEntryWidget = nil },
+		func(wd *shared.GuiWindowData, val string) { wd.Filters.MinSalaryEntry = val },
+		func(wd *shared.GuiWindowData) string { return wd.Filters.MinSalaryEntry },
 		"12345",
 	)
 }
 
 func TestBuildRightSplit(t *testing.T) {
-	container := BuildRightSplit()
+	windowData := &shared.GuiWindowData{}
+	container := BuildRightSplit(windowData)
 	if container == nil {
 		t.Fatal("Expected non-nil container")
 	}
@@ -125,15 +126,16 @@ func containsAllSubstrings(output string, requiredSubstrings []string) bool {
 
 func testFilterContainer(
 	t *testing.T,
-	buildFunc func() *fyne.Container,
-	resetWidget func(),
-	setFilterValue func(string),
-	getFilterValue func() string,
+	buildFunc func(*shared.GuiWindowData) *fyne.Container,
+	resetWidget func(*shared.GuiWindowData),
+	setFilterValue func(*shared.GuiWindowData, string),
+	getFilterValue func(*shared.GuiWindowData) string,
 	testValue string,
 ) {
-	resetWidget()
-	setFilterValue("")
-	container := buildFunc()
+	windowData := &shared.GuiWindowData{}
+	resetWidget(windowData)
+	setFilterValue(windowData, "")
+	container := buildFunc(windowData)
 	if container == nil {
 		t.Fatal("Expected non-nil container")
 	}
@@ -151,7 +153,7 @@ func testFilterContainer(
 	}
 	entry.SetText(testValue)
 	test.Tap(button)
-	if getFilterValue() != testValue {
-		t.Errorf("Expected filter to be set to '%s', got '%s'", testValue, getFilterValue())
+	if getFilterValue(windowData) != testValue {
+		t.Errorf("Expected filter to be set to '%s', got '%s'", testValue, getFilterValue(windowData))
 	}
 }
