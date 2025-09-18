@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-func FilterJobs(jobs []shared.JobData) []shared.JobData {
-	filters := shared.WindowData.Filters
+func FilterJobs(jobs []shared.JobData, filters shared.FilterEntries) []shared.JobData {
 	if filters.KeywordEntry != "" || filters.LocationEntry != "" || filters.MinSalaryEntry != "" ||
 		filters.WorkFromHomeEntry {
 		var filteredJobs []shared.JobData

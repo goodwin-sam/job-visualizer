@@ -24,15 +24,15 @@ func BuildStartContainer(window fyne.Window, startButton *widget.Button, progres
 	return container.NewVBox(startLabel, inputOutputContainers, startButton, quitButton)
 }
 
-func BuildLeftSplit(jobs []shared.JobData) *container.Split {
-	createJobList()
-	refreshButton, filterButton, selectedDetailsButton := buildwidgets.BuildMainButtons(jobs)
+func BuildLeftSplit(jobs []shared.JobData, windowData *shared.GuiWindowData) *container.Split {
+	createJobList(windowData)
+	refreshButton, filterButton, selectedDetailsButton := buildwidgets.BuildMainButtons(jobs, windowData)
 	selectedDetailsLabel := buildwidgets.BuildLabel("Select a job and click button to display details",
 		true, false)
 
-	filterContainer := buildFilterContainer()
+	filterContainer := buildFilterContainer(windowData)
 
-	jobScroll := container.NewScroll(shared.WindowData.ListWidget)
+	jobScroll := container.NewScroll(windowData.ListWidget)
 	filterVBox := container.NewVBox(refreshButton, filterContainer, filterButton)
 	selectedDetailsContainer := container.NewBorder(
 		selectedDetailsLabel,
@@ -44,29 +44,29 @@ func BuildLeftSplit(jobs []shared.JobData) *container.Split {
 	return leftSplit
 }
 
-func BuildRightSplit() *fyne.Container {
+func BuildRightSplit(windowData *shared.GuiWindowData) *fyne.Container {
 	detailsLabel := buildwidgets.BuildLabel("Select a job to display details", true, false)
 	detailsLabel.Wrapping = fyne.TextWrapWord
-	shared.WindowData.DetailsWidget = detailsLabel
-	rightPane := container.NewVBox(shared.WindowData.DetailsWidget, buildwidgets.BuildQuitButton())
+	windowData.DetailsWidget = detailsLabel
+	rightPane := container.NewVBox(windowData.DetailsWidget, buildwidgets.BuildQuitButton())
 	return rightPane
 }
 
-func createJobList() {
+func createJobList(windowData *shared.GuiWindowData) {
 	getDataLen := func() int {
-		if shared.WindowData.FilteredJobs == nil {
+		if windowData.FilteredJobs == nil {
 			return 0
 		}
-		return len(*shared.WindowData.FilteredJobs)
+		return len(*windowData.FilteredJobs)
 	}
 
 	updateListItem := func(itemNum widget.ListItemID, listItem fyne.CanvasObject) {
-		itemName := (*shared.WindowData.FilteredJobs)[itemNum].CompanyName
+		itemName := (*windowData.FilteredJobs)[itemNum].CompanyName
 		listItem.(*widget.Label).SetText(itemName)
 	}
-	shared.WindowData.ListWidget = widget.NewList(getDataLen, createListItem, updateListItem)
-	shared.WindowData.ListWidget.OnSelected = func(i int) {
-		shared.WindowData.SelectedJobDetails = formatJobDetails(i, shared.WindowData)
+	windowData.ListWidget = widget.NewList(getDataLen, createListItem, updateListItem)
+	windowData.ListWidget.OnSelected = func(i int) {
+		windowData.SelectedJobDetails = formatJobDetails(i, *windowData)
 	}
 }
 
@@ -84,11 +84,11 @@ func formatJobDetails(i int, window shared.GuiWindowData) string {
 	return formattedDetails
 }
 
-func buildFilterContainer() *fyne.Container {
-	keywordContainer := buildKeywordContainer()
-	locationContainer := buildLocationContainer()
-	minSalaryContainer := buildMinSalaryContainer()
-	remoteCheckbox := buildwidgets.BuildRemoteCheckbox()
+func buildFilterContainer(windowData *shared.GuiWindowData) *fyne.Container {
+	keywordContainer := buildKeywordContainer(windowData)
+	locationContainer := buildLocationContainer(windowData)
+	minSalaryContainer := buildMinSalaryContainer(windowData)
+	remoteCheckbox := buildwidgets.BuildRemoteCheckbox(windowData)
 	filterContainer := container.NewVBox(keywordContainer, locationContainer, minSalaryContainer, remoteCheckbox)
 	return filterContainer
 }

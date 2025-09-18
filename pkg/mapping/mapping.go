@@ -44,9 +44,9 @@ func innerMap(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func GenerateMap(jobs []shared.JobData) []shared.JobData {
+func GenerateMap(jobs []shared.JobData, windowData *shared.GuiWindowData) []shared.JobData {
 	geoplotMap = createGeoplotMap(jobs)
-	shared.WindowData.Server = createHttpServer()
+	windowData.Server = createHttpServer(windowData)
 	openWebpage()
 	return jobs
 }
@@ -133,9 +133,9 @@ func displayDescription(markerJobs []shared.JobData) string {
 	return description
 }
 
-func createHttpServer() *http.Server {
-	if shared.WindowData.Server != nil {
-		err := shared.WindowData.Server.Close()
+func createHttpServer(windowData *shared.GuiWindowData) *http.Server {
+	if windowData.Server != nil {
+		err := windowData.Server.Close()
 		shared.CheckErrorWarn(err)
 	}
 	server := &http.Server{Addr: ":8080"}

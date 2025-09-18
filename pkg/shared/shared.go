@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var WindowData GuiWindowData
 var Program ProgramData
 var StartWindow fyne.Window
 var MainWindow fyne.Window

@@ -7,7 +7,6 @@ import (
 	"job-visualizer/pkg/gui/build"
 	"job-visualizer/pkg/jobdata"
 	"job-visualizer/pkg/jobdata/processing"
-	"job-visualizer/pkg/mapping"
 	"job-visualizer/pkg/shared"
 	"os"
 	"path/filepath"
@@ -61,13 +60,14 @@ func createGuiApp(programData shared.ProgramData) {
 	application = app.NewWithID("job-visualizer")
 	progressBar := widget.NewProgressBar()
 	progressBar.SetValue(0)
+	windowData := &shared.GuiWindowData{}
 	startButton := widget.NewButton("Start Application", func() {
 		go func() {
 			allJobData := processJobs(programData, progressBar)
 			fyne.DoAndWait(func() {
 				shared.MainWindow = createGuiWindow("job-visualizer")
 				shared.MainWindow.SetOnClosed(func() { application.Quit() })
-				shared.MainWindow = build.BuildMainWindow(shared.MainWindow, allJobData)
+				shared.MainWindow = build.BuildMainWindow(shared.MainWindow, allJobData, windowData)
 				shared.StartWindow.Hide()
 				shared.MainWindow.Show()
 			})
@@ -93,8 +93,7 @@ func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar
 	} else {
 		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
 	}
-	allJobData = mapping.GenerateMap(allJobData)
-
+	// Note: mapping.GenerateMap will be called from the GUI with windowData
 	jobsDatabase := database.CreateDatabase(programData.OutputDirectory)
 	database.SetupDatabase(jobsDatabase)
 	database.WriteToDatabase(jobsDatabase, allJobData)
