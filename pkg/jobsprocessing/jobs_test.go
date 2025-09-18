@@ -1,4 +1,4 @@
-package jobdata
+package jobsprocessing
 
 import (
 	"job-visualizer/pkg/shared"

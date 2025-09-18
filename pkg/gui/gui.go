@@ -5,8 +5,8 @@ import (
 	"job-visualizer/pkg/database"
 	"job-visualizer/pkg/excel"
 	"job-visualizer/pkg/gui/build"
-	"job-visualizer/pkg/jobdata"
-	"job-visualizer/pkg/jobdata/processing"
+	"job-visualizer/pkg/jobsprocessing"
+	"job-visualizer/pkg/jobsprocessing/processing"
 	"job-visualizer/pkg/mapping"
 	"job-visualizer/pkg/shared"
 	"os"
@@ -87,7 +87,7 @@ func createGuiWindow(app fyne.App, title string) fyne.Window {
 func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar, mappingService *mapping.MappingService) []shared.JobData {
 	files := excel.OpenExcelFile(programData.InputFiles)
 	rows := excel.GetAllRows(files)
-	allJobData := jobdata.ProcessRows(rows, []shared.JobData{})
+	allJobData := jobsprocessing.ProcessRows(rows, []shared.JobData{})
 	if progressBar != nil {
 		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, progressBar)
 	} else {

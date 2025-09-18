@@ -1,10 +1,12 @@
-package jobdata
+// package jobsprocessing processes raw job data from Excel rows into structured JobData objects
+package jobsprocessing
 
 import (
 	"job-visualizer/pkg/shared"
 	"strconv"
 )
 
+// ProcessRows converts Excel rows into JobData structs, skipping invalid rows
 func ProcessRows(rows [][]string, allJobData []shared.JobData) []shared.JobData {
 	if len(rows) < 2 {
 		return allJobData
@@ -26,6 +28,7 @@ func ProcessRows(rows [][]string, allJobData []shared.JobData) []shared.JobData 
 	return allJobData
 }
 
+// calcSalary calculates average salary, converting hourly to yearly if needed
 func calcSalary(row []string) int {
 	maxSalaryString := row[6]
 	minSalaryString := row[7]

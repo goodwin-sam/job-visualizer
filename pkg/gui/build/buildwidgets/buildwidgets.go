@@ -1,7 +1,7 @@
 package buildwidgets
 
 import (
-	"job-visualizer/pkg/jobdata/filter"
+	"job-visualizer/pkg/jobsprocessing/filter"
 	"job-visualizer/pkg/mapping"
 	"job-visualizer/pkg/shared"
 	"strings"
