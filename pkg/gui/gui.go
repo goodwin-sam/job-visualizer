@@ -1,3 +1,4 @@
+// package gui provides gui operations
 package gui
 
 import (
@@ -6,7 +7,7 @@ import (
 	"job-visualizer/pkg/excel"
 	"job-visualizer/pkg/gui/build"
 	"job-visualizer/pkg/jobsprocessing"
-	"job-visualizer/pkg/jobsprocessing/processing"
+	"job-visualizer/pkg/jobsprocessing/geocoding"
 	"job-visualizer/pkg/mapping"
 	"job-visualizer/pkg/shared"
 	"os"
@@ -20,6 +21,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// RunGUIorHeadless launches either GUI or headless mode based on user preference
 func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 	if headless {
 		workingDirectory, err := os.Getwd()
@@ -55,6 +57,7 @@ func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 	}
 }
 
+// createGuiApp initializes and runs the GUI application
 func createGuiApp(programData shared.ProgramData) {
 	application := app.NewWithID("job-visualizer")
 	progressBar := widget.NewProgressBar()
@@ -78,20 +81,23 @@ func createGuiApp(programData shared.ProgramData) {
 	startWindow.ShowAndRun()
 }
 
+// createGuiWindow creates a new Fyne window
 func createGuiWindow(app fyne.App, title string) fyne.Window {
 	Window := app.NewWindow(title)
 	Window.Resize(fyne.NewSize(1000, 600))
 	return Window
 }
 
+// TODO: move this to a new file
+// processJobs handles the complete job data processing pipeline
 func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar, mappingService *mapping.MappingService) []shared.JobData {
 	files := excel.OpenExcelFile(programData.InputFiles)
 	rows := excel.GetAllRows(files)
 	allJobData := jobsprocessing.ProcessRows(rows, []shared.JobData{})
 	if progressBar != nil {
-		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, progressBar)
+		allJobData = geocoding.ProcessLatLongs(allJobData, programData.CacheDirectory, progressBar)
 	} else {
-		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
+		allJobData = geocoding.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
 	}
 	allJobData = mappingService.GenerateMap(allJobData, &shared.GuiWindowData{})
 	jobsDatabase := database.CreateDatabase(programData.OutputDirectory)

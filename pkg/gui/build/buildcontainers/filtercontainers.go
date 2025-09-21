@@ -1,3 +1,4 @@
+// package buildcontainers provides container layout and organization for GUI components
 package buildcontainers
 
 import (
@@ -8,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// buildKeywordContainer creates the keyword filter input and button
 func buildKeywordContainer(windowData *shared.GuiWindowData) *fyne.Container {
 	windowData.KeywordEntryWidget = widget.NewEntry()
 	windowData.KeywordEntryWidget.SetPlaceHolder("Enter keyword filter here")
@@ -18,6 +20,7 @@ func buildKeywordContainer(windowData *shared.GuiWindowData) *fyne.Container {
 	return keywordContainer
 }
 
+// buildLocationContainer creates the location filter input and button
 func buildLocationContainer(windowData *shared.GuiWindowData) *fyne.Container {
 	windowData.LocationEntryWidget = widget.NewEntry()
 	windowData.LocationEntryWidget.SetPlaceHolder("Enter location filter here")
@@ -28,6 +31,7 @@ func buildLocationContainer(windowData *shared.GuiWindowData) *fyne.Container {
 	return locationContainer
 }
 
+// buildMinSalaryContainer creates the minimum salary filter input and button
 func buildMinSalaryContainer(windowData *shared.GuiWindowData) *fyne.Container {
 	windowData.MinSalaryEntryWidget = widget.NewEntry()
 	windowData.MinSalaryEntryWidget.SetPlaceHolder("Enter minimum salary filter here")

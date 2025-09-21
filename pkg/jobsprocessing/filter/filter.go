@@ -1,3 +1,4 @@
+// package filter provides job filtering functionality based on user criteria
 package filter
 
 import (
@@ -6,6 +7,7 @@ import (
 	"strings"
 )
 
+// FilterJobs applies user filters to a list of jobs and returns matching results
 func FilterJobs(jobs []shared.JobData, filters shared.FilterEntries) []shared.JobData {
 	if filters.KeywordEntry != "" || filters.LocationEntry != "" || filters.MinSalaryEntry != "" ||
 		filters.WorkFromHomeEntry {
@@ -18,6 +20,7 @@ func FilterJobs(jobs []shared.JobData, filters shared.FilterEntries) []shared.Jo
 	return jobs
 }
 
+// filterIndividualJob checks if a single job matches all applied filters
 func filterIndividualJob(job shared.JobData, filteredJobs []shared.JobData, filters shared.FilterEntries) []shared.JobData {
 	filterMatch := true
 	if filters.KeywordEntry != "" {
@@ -42,6 +45,7 @@ func filterIndividualJob(job shared.JobData, filteredJobs []shared.JobData, filt
 	return filteredJobs
 }
 
+// filterKeyword searches for keywords in job title, company, description, and qualifications
 func filterKeyword(job shared.JobData, filterInput string) bool {
 	filterMatch := false
 	filter := strings.ToLower(filterInput)
@@ -56,6 +60,7 @@ func filterKeyword(job shared.JobData, filterInput string) bool {
 	return filterMatch
 }
 
+// filterLocation searches for location keywords in job location field
 func filterLocation(job shared.JobData, filterInput string) bool {
 	filterMatch := false
 	jobLocation := strings.ToLower(job.Location)
@@ -66,6 +71,7 @@ func filterLocation(job shared.JobData, filterInput string) bool {
 	return filterMatch
 }
 
+// filterMinSalary checks if job salary meets minimum salary requirement
 func filterMinSalary(job shared.JobData, filter string) bool {
 	filterMatch := false
 	salary := job.Salary
@@ -80,6 +86,7 @@ func filterMinSalary(job shared.JobData, filter string) bool {
 	return filterMatch
 }
 
+// filterWorkFromHome checks if job offers remote work option
 func filterWorkFromHome(job shared.JobData) bool {
 	return job.WorkFromHome == "Yes"
 }

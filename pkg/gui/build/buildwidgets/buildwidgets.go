@@ -1,3 +1,4 @@
+// package buildwidgets provides widget creation and event handling for the GUI
 package buildwidgets
 
 import (
@@ -11,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// BuildMainButtons creates the main window buttons for job filtering and display
 func BuildMainButtons(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) (*widget.Button, *widget.Button, *widget.Button) {
 	refreshButton := widget.NewButton("Click to refresh list of jobs to original", func() {
 		handleJobRefresh(jobs, windowData, mappingService)
@@ -25,6 +27,7 @@ func BuildMainButtons(jobs []shared.JobData, windowData *shared.GuiWindowData, m
 	return refreshButton, filterButton, selectedDetailsButton
 }
 
+// BuildStartButtons creates the start window buttons for selection and navigation
 func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputDirectoryLabel *widget.Label, programData *shared.ProgramData) (*widget.Button, *widget.Button, *widget.Button) {
 	inputFileButton := widget.NewButton("Select Input Files", func() {
 		inputFileDialog := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
@@ -60,11 +63,13 @@ func BuildStartButtons(window fyne.Window, inputFileLabel *widget.Label, outputD
 	return inputFileButton, outputDirectoryButton, quitButton
 }
 
+// BuildLabel creates a styled label widget with specified formatting
 func BuildLabel(text string, boldBool bool, italicBool bool) *widget.Label {
 	return widget.NewLabelWithStyle(text, fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: boldBool, Italic: italicBool})
 }
 
+// BuildRemoteCheckbox creates a checkbox for filtering remote work jobs
 func BuildRemoteCheckbox(windowData *shared.GuiWindowData) *widget.Check {
 	remoteCheckbox := widget.NewCheck("Remote Work: check for yes, uncheck for all", func(checked bool) {
 		if checked {
@@ -76,10 +81,12 @@ func BuildRemoteCheckbox(windowData *shared.GuiWindowData) *widget.Check {
 	return remoteCheckbox
 }
 
+// BuildQuitButton creates a quit button that exits the application
 func BuildQuitButton() *widget.Button {
 	return widget.NewButton("Quit", func() { fyne.CurrentApp().Quit() })
 }
 
+// handleJobRefresh clears all filters and refreshes the job list
 func handleJobRefresh(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) {
 	removeActiveFilters(windowData)
 	filteredJobs := filter.FilterJobs(jobs, windowData.Filters)
@@ -90,6 +97,7 @@ func handleJobRefresh(jobs []shared.JobData, windowData *shared.GuiWindowData, m
 	refreshEntries(windowData)
 }
 
+// handleJobFilter applies current filter settings to the job list
 func handleJobFilter(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) {
 	filteredJobs := filter.FilterJobs(jobs, windowData.Filters)
 	if ms, ok := mappingService.(*mapping.MappingService); ok {
@@ -98,6 +106,7 @@ func handleJobFilter(jobs []shared.JobData, windowData *shared.GuiWindowData, ma
 	windowData.FilteredJobs = &filteredJobs
 }
 
+// removeActiveFilters clears all filter entries from the window data
 func removeActiveFilters(windowData *shared.GuiWindowData) {
 	windowData.Filters.KeywordEntry = ""
 	windowData.Filters.LocationEntry = ""
@@ -105,6 +114,7 @@ func removeActiveFilters(windowData *shared.GuiWindowData) {
 	windowData.Filters.WorkFromHomeEntry = false
 }
 
+// refreshEntries resets all filter input fields to empty state
 func refreshEntries(windowData *shared.GuiWindowData) {
 	windowData.KeywordEntryWidget.SetText("")
 	windowData.LocationEntryWidget.SetText("")

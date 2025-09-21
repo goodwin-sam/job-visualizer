@@ -1,3 +1,4 @@
+// package database provides SQLite database operations for job data storage
 package database
 
 import (
@@ -9,6 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// CreateDatabase creates a new SQLite database file in the output directory
 func CreateDatabase(outputDirectory string) *sql.DB {
 	databasePath := filepath.Join(outputDirectory, "job_data.sqlite")
 	err := os.Remove(databasePath)
@@ -20,11 +22,13 @@ func CreateDatabase(outputDirectory string) *sql.DB {
 	return db
 }
 
+// SetupDatabase creates the database tables
 func SetupDatabase(db *sql.DB) {
 	createMainTable(db)
 	createSecondaryTables(db)
 }
 
+// WriteToDatabase inserts all the job data into the database tables
 func WriteToDatabase(db *sql.DB, allJobData []shared.JobData) {
 	insertQueryJobData := `INSERT INTO job_data (location, job_title, company_name, description, date_posted, salary,
 		work_from_home, qualifications, links, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
@@ -43,6 +47,7 @@ func WriteToDatabase(db *sql.DB, allJobData []shared.JobData) {
 	}
 }
 
+// createMainTable creates the main job_data table with all job information
 func createMainTable(db *sql.DB) {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS job_data(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,6 +65,7 @@ func createMainTable(db *sql.DB) {
 	shared.CheckError(err)
 }
 
+// createSecondaryTables creates supporting tables for qualifications and links
 func createSecondaryTables(db *sql.DB) {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS qualifications(
 		id INTEGER PRIMARY KEY,
