@@ -1,4 +1,4 @@
-package processing
+package geocoding
 
 import (
 	"path/filepath"

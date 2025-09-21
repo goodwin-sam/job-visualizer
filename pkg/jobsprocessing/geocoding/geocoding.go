@@ -1,4 +1,5 @@
-package processing
+// package geocoding handles geocoding and location processing for job data
+package geocoding
 
 import (
 	"encoding/json"
@@ -18,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// ProcessLatLongs geocodes job locations using cached data and OpenStreetMap API
 func ProcessLatLongs(jobs []shared.JobData, cacheDirectory string, progressBar *widget.ProgressBar) []shared.JobData {
 	cacheFilename := filepath.Join(cacheDirectory, "cached_locations.json")
 	cachedLocations := make(map[string]shared.LatLong)
@@ -29,6 +31,7 @@ func ProcessLatLongs(jobs []shared.JobData, cacheDirectory string, progressBar *
 	return jobs
 }
 
+// loadCacheFromFile loads previously geocoded locations from cache file
 func loadCacheFromFile(filename string, cachedLocations map[string]shared.LatLong) {
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return
@@ -45,6 +48,7 @@ func loadCacheFromFile(filename string, cachedLocations map[string]shared.LatLon
 	shared.CheckErrorWarn(err)
 }
 
+// standardizeLocations cleans and normalizes location strings for efficient geocoding
 func standardizeLocations(jobs []shared.JobData) []shared.JobData {
 	reNumbers := regexp.MustCompile(`[0-9]+`)
 	rePunctuation := regexp.MustCompile(`[^-\w\s]`)
@@ -60,6 +64,7 @@ func standardizeLocations(jobs []shared.JobData) []shared.JobData {
 	return jobs
 }
 
+// cacheLatLongs geocodes locations using OpenStreetMap API and caches results
 func cacheLatLongs(jobs []shared.JobData, cachedLocations map[string]shared.LatLong, progressBar *widget.ProgressBar) {
 	for i, job := range jobs {
 		fmt.Printf("\rcaching job locations (%d/%d)", i+1, len(jobs))
@@ -83,6 +88,7 @@ func cacheLatLongs(jobs []shared.JobData, cachedLocations map[string]shared.LatL
 	fmt.Println()
 }
 
+// assignLatLongs assigns cached coordinates to job data
 func assignLatLongs(jobs []shared.JobData, cachedLocations map[string]shared.LatLong) []shared.JobData {
 	for i, job := range jobs {
 		if coordinates, ok := cachedLocations[job.StandardizedLocation]; ok {
@@ -92,6 +98,7 @@ func assignLatLongs(jobs []shared.JobData, cachedLocations map[string]shared.Lat
 	return jobs
 }
 
+// saveCacheToFile saves geocoded locations to cache file for future use
 func saveCacheToFile(filename string, cachedLocations map[string]shared.LatLong) {
 	file, err := os.Create(filename)
 	shared.CheckErrorWarn(err)
@@ -104,6 +111,7 @@ func saveCacheToFile(filename string, cachedLocations map[string]shared.LatLong)
 	shared.CheckErrorWarn(err)
 }
 
+// getNominatimResponse queries OpenStreetMap Nominatim API for location coordinates
 func getNominatimResponse(location string) []byte {
 	encodedLocation := url.QueryEscape(location)
 	apiUrl := fmt.Sprintf("https://nominatim.openstreetmap.org/search?q=%s&format=json", encodedLocation)
@@ -118,6 +126,7 @@ func getNominatimResponse(location string) []byte {
 	return responseBody
 }
 
+// addLocationToCache adds geocoded coordinates to the cache map
 func addLocationToCache(jobLocation string, locations []shared.JsonLocation, cachedLocations map[string]shared.LatLong) {
 	latitude, err := strconv.ParseFloat(locations[0].Lat, 64)
 	shared.CheckErrorWarn(err)
