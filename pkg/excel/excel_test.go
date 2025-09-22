@@ -1,3 +1,4 @@
+// package excel provides tests for Excel file processing functionality
 package excel
 
 import (
@@ -9,8 +10,11 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// TestOpenExcelFile tests the OpenExcelFile function with multiple Excel files
 func TestOpenExcelFile(t *testing.T) {
 	tempDirectory := t.TempDir()
+
+	// creates first test Excel file with job data
 	testFile1 := excelize.NewFile()
 	sheet := "Jobs"
 	_, err := testFile1.NewSheet(sheet)
@@ -18,6 +22,7 @@ func TestOpenExcelFile(t *testing.T) {
 	_ = testFile1.SetSheetRow(sheet, "A1", &[]string{"Location", "Job Title", "Company Name"})
 	_ = testFile1.SetSheetRow(sheet, "A2", &[]string{"New York", "Software Engineer", "Tech Corp"})
 
+	// creates second test Excel file with additional job data
 	testFile2 := excelize.NewFile()
 	_, err = testFile2.NewSheet(sheet)
 	shared.CheckErrorWarn(err)
@@ -25,6 +30,7 @@ func TestOpenExcelFile(t *testing.T) {
 	_ = testFile2.SetSheetRow(sheet, "A2", &[]string{"San Francisco", "Data Scientist", "Data Inc."})
 	_ = testFile2.SetSheetRow(sheet, "A3", &[]string{"Los Angeles", "Product Manager", "Creative Solutions"})
 
+	// saves test files to temporary directory
 	testFile1Path := filepath.Join(tempDirectory, "test1.xlsx")
 	testFile2Path := filepath.Join(tempDirectory, "test2.xlsx")
 	err = testFile1.SaveAs(testFile1Path)
@@ -37,11 +43,14 @@ func TestOpenExcelFile(t *testing.T) {
 	}
 	inputFiles := []string{testFile1Path, testFile2Path}
 
+	// tests opening multiple Excel files
 	files := OpenExcelFile(inputFiles)
 
+	// verifies correct number of files were opened
 	if len(files) != 2 {
 		t.Fatalf("Expected 2 files, got %d", len(files))
 	}
+	// verifies each file contains the expected "Jobs" sheet
 	for i, file := range files {
 		sheets := file.GetSheetList()
 		if !slices.Contains(sheets, sheet) {
@@ -50,7 +59,9 @@ func TestOpenExcelFile(t *testing.T) {
 	}
 }
 
+// TestGetAllRows tests the GetAllRows function to ensure it skips header row and returns data rows
 func TestGetAllRows(t *testing.T) {
+	// creates test Excel file with header and data rows
 	file := excelize.NewFile()
 	sheet := "Jobs"
 	_, err := file.NewSheet(sheet)
@@ -60,16 +71,21 @@ func TestGetAllRows(t *testing.T) {
 	_ = file.SetSheetRow(sheet, "A3", &[]string{"San Francisco", "Data Scientist", "Data Inc."})
 	_ = file.SetSheetRow(sheet, "A4", &[]string{"Los Angeles", "Product Manager", "Creative Solutions"})
 	files := []*excelize.File{file}
+
+	// tests extracting all rows (should skip header)
 	rows := GetAllRows(files)
 
+	// defines expected data rows (excluding header)
 	expected := [][]string{
 		{"New York", "Software Engineer", "Tech Corp"},
 		{"San Francisco", "Data Scientist", "Data Inc."},
 		{"Los Angeles", "Product Manager", "Creative Solutions"},
 	}
+	// verifies correct number of rows returned
 	if len(rows) != len(expected) {
 		t.Fatalf("Expected %d rows, got %d", len(expected), len(rows))
 	}
+	// verifies each row contains correct data
 	for i, row := range rows {
 		if len(row) != len(expected[i]) {
 			t.Fatalf("Row %d: Expected %d columns, got %d", i+1, len(expected[i]), len(row))
