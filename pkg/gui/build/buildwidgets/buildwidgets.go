@@ -21,7 +21,12 @@ func BuildMainButtons(jobs []shared.JobData, windowData *shared.GuiWindowData, m
 		handleJobFilter(jobs, windowData, mappingService)
 	})
 	selectedDetailsButton := widget.NewButton("Click to display selected job details", func() {
-		windowData.DetailsWidget.SetText(windowData.SelectedJobDetails)
+		if windowData.ListWidget != nil {
+			windowData.ListWidget.Refresh()
+		}
+		if windowData.DetailsWidget != nil {
+			windowData.DetailsWidget.SetText(windowData.SelectedJobDetails)
+		}
 	})
 
 	return refreshButton, filterButton, selectedDetailsButton
@@ -95,6 +100,12 @@ func handleJobRefresh(jobs []shared.JobData, windowData *shared.GuiWindowData, m
 	}
 	windowData.FilteredJobs = &filteredJobs
 	refreshEntries(windowData)
+	if windowData.ListWidget != nil {
+		windowData.ListWidget.Refresh()
+	}
+	if windowData.DetailsWidget != nil {
+		windowData.DetailsWidget.SetText("Select a job to display details")
+	}
 }
 
 // handleJobFilter applies current filter settings to the job list
@@ -104,6 +115,12 @@ func handleJobFilter(jobs []shared.JobData, windowData *shared.GuiWindowData, ma
 		ms.GenerateMap(filteredJobs, windowData)
 	}
 	windowData.FilteredJobs = &filteredJobs
+	if windowData.ListWidget != nil {
+		windowData.ListWidget.Refresh()
+	}
+	if windowData.DetailsWidget != nil {
+		windowData.DetailsWidget.SetText("Select a job to display details")
+	}
 }
 
 // removeActiveFilters clears all filter entries from the window data
