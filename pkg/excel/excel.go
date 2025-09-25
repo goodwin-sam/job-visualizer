@@ -2,7 +2,9 @@
 package excel
 
 import (
+	"fmt"
 	"job-visualizer/pkg/shared"
+	"strings"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -22,9 +24,22 @@ func OpenExcelFile(inputFiles []string) []*excelize.File {
 func GetAllRows(files []*excelize.File) [][]string {
 	var allRows [][]string
 	for _, file := range files {
-		rows, err := file.GetRows("Jobs")
+		worksheetName := findJobsWorksheet(file)
+		rows, err := file.GetRows(worksheetName)
 		shared.CheckError(err)
 		allRows = append(allRows, rows[1:]...)
 	}
 	return allRows
+}
+
+// findJobsWorksheet finds the worksheet named "Jobs" (case-insensitive)
+func findJobsWorksheet(file *excelize.File) string {
+	sheetList := file.GetSheetList()
+	for _, sheet := range sheetList {
+		if strings.ToLower(sheet) == "jobs" {
+			return sheet
+		}
+	}
+	shared.CheckError(fmt.Errorf("no 'Jobs' worksheet found in Excel file"))
+	return ""
 }
