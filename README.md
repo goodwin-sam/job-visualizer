@@ -7,7 +7,8 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 - **Excel Processing**: Import and analyze job data from `.xlsx` and `.xls` files
 - **Interactive GUI**: Desktop interface with job filtering and mapping
 - **Headless Mode**: Command-line processing
-- **Job Mapping**: Visualize job locations on interactive maps
+- **Job Mapping**: Visualize job locations on interactive maps with web browser integration
+- **Geocoding & Caching**: Automatic location geocoding with local caching for faster processing
 - **Database Storage**: SQLite database for efficient data management
 
 ## Download and Installation
@@ -16,20 +17,15 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 
 1. **Download the AppImage**:
    - Go to the [Releases](https://github.com/samg111/job-visualizer/releases) page
-   - Download the latest `Job_Visualizer-x86_64.AppImage` file
+   - Download the latest `job-visualizer-vX.X.X-x86_64.AppImage` file
 
-2. **Make it executable**:
-   ```bash
-   chmod +x Job_Visualizer-x86_64.AppImage
-   ```
-
-3. **Run the application**:
+2. **Run the application**:
    ```bash
    # If appimage file saved in current directory
-   ./Job_Visualizer-x86_64.AppImage
+   ./job-visualizer-vX.X.X-x86_64.AppImage
    
    # If saved in PATH (e.g., /usr/local/bin/)
-   Job_Visualizer-x86_64.AppImage
+   job-visualizer-vX.X.X-x86_64.AppImage
    ```
 
 ### Option 2: Build from Source
@@ -81,7 +77,7 @@ Run the application with argument --headless for headless processing:
 
 ```bash
 # Process all Excel files in current directory
-./Job_Visualizer-x86_64.AppImage --headless
+./job-visualizer-vX.X.X-x86_64.AppImage --headless
 ```
 
 The headless mode will:
@@ -91,7 +87,15 @@ The headless mode will:
 
 ## Data Format
 
-The application expects Excel files with the following columns structure and a header line. Please see demo excel file demoData.xlsx:
+The application expects Excel files with the following requirements:
+
+### Worksheet Requirements
+- **Worksheet Name**: Must be named "jobs" (case-insensitive - "jobs", "Jobs", "JOBS" all work)
+- **Header Row**: First row must contain column headers
+- **Data Rows**: All subsequent rows contain job data
+
+### Column Structure
+Please see demo excel file `demoData.xlsx` for reference:
 - A1: Company Name
 - B1: Posting Age
 - C1: JobId
@@ -102,6 +106,12 @@ The application expects Excel files with the following columns structure and a h
 - H1: Salary Min
 - I1: Salary Type
 - J1: Job Title
+
+### Geocoding & Caching
+- **Automatic Geocoding**: Job locations are automatically converted to coordinates using OpenStreetMap's Nominatim API
+- **Intelligent Caching**: Geocoded locations are cached in `~/.job-visualizer/cached_locations.json` to avoid repeated API calls
+- **Location Standardization**: Location strings are cleaned and standardized to reduce repeated API calls on the same cities/towns
+- **Performance**: Cached locations load instantly, significantly speeding up subsequent processing runs
 
 ## System Requirements
 
@@ -116,12 +126,12 @@ If the AppImage doesn't run:
 
 1. **Check permissions**:
    ```bash
-   chmod +x Job_Visualizer-x86_64.AppImage
+   chmod +x job-visualizer-vX.X.X-x86_64.AppImage
    ```
 
 2. **Run from terminal to see errors**:
    ```bash
-   ./Job_Visualizer-x86_64.AppImage
+   ./job-visualizer-vX.X.X-x86_64.AppImage
    ```
 
 3. **Check if your system supports AppImages**:
