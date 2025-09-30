@@ -59,9 +59,9 @@ go run ./cmd/app --headless
 
 1. Launch the application
 2. Use the file selection button to choose one or more Excel files (`.xlsx` or `.xls`)
-3. Select an output directory for processed data
+3. Select an output directory for a sqlite database with processed data
 4. Click "Start Application" to begin processing
-5. Once processing is complete, you'll see the main interface with job data
+5. Once processing is complete, you'll see the main interface with filtering options, full or filtered job list, and selected job details
 6. Use the filtering options to search and filter jobs by:
    - Keywords
    - Location
@@ -81,9 +81,9 @@ Run the application with argument --headless for headless processing:
 ```
 
 The headless mode will:
-- Process all `.xlsx` and `.xls` files in the current directory
-- Display job information in a sqlite database table
-- Output results in a formatted table to the command line
+- Process all `.xlsx` and `.xls` files in the current working directory
+- Display job information in a sqlite database table in the current working directory
+- Output results in a formatted table to the command line also
 
 ## Data Format
 
@@ -115,8 +115,8 @@ Please see demo excel file `demoData.xlsx` for reference:
 
 ## System Requirements
 
-- **Operating System**: Linux (AppImage)
-- **Dependencies**: None required for AppImage (self-contained)
+- **Operating System**: Linux (AppImage), Windows (.exe)
+- **Dependencies**: None required for AppImage or .exe (self-contained)
 
 ## Troubleshooting
 
