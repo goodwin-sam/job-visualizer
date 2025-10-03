@@ -3,12 +3,9 @@ package gui
 
 import (
 	"fmt"
-	"job-visualizer/pkg/database"
-	"job-visualizer/pkg/excel"
 	"job-visualizer/pkg/gui/build"
-	"job-visualizer/pkg/jobsprocessing"
-	"job-visualizer/pkg/jobsprocessing/geocoding"
 	"job-visualizer/pkg/mapping"
+	"job-visualizer/pkg/processor"
 	"job-visualizer/pkg/shared"
 	"os"
 	"path/filepath"
@@ -42,7 +39,7 @@ func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 		programData.InputFiles = inputFiles
 		programData.OutputDirectory = workingDirectory
 
-		allJobData := processJobs(programData, nil, mapping.NewMappingService())
+		allJobData := processor.ProcessJobs(programData, nil, mapping.NewMappingService())
 		for i, job := range allJobData {
 			if i%100 == 0 {
 				fmt.Printf("%-4s | %-25s | %-55s | %-25s\n",
@@ -67,7 +64,7 @@ func createGuiApp(programData shared.ProgramData) {
 	startWindow := createGuiWindow(application, "job-visualizer")
 	startButton := widget.NewButton("Start Application", func() {
 		go func() {
-			allJobData := processJobs(programData, progressBar, mappingService)
+			allJobData := processor.ProcessJobs(programData, progressBar, mappingService)
 			fyne.DoAndWait(func() {
 				mainWindow := createGuiWindow(application, "job-visualizer")
 				mainWindow.SetOnClosed(func() { application.Quit() })
@@ -86,22 +83,4 @@ func createGuiWindow(app fyne.App, title string) fyne.Window {
 	Window := app.NewWindow(title)
 	Window.Resize(fyne.NewSize(1000, 600))
 	return Window
-}
-
-// TODO: move this to a new file
-// processJobs handles the complete job data processing pipeline
-func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar, mappingService *mapping.MappingService) []shared.JobData {
-	files := excel.OpenExcelFile(programData.InputFiles)
-	rows := excel.GetAllRows(files)
-	allJobData := jobsprocessing.ProcessRows(rows, []shared.JobData{})
-	if progressBar != nil {
-		allJobData = geocoding.ProcessLatLongs(allJobData, programData.CacheDirectory, progressBar)
-	} else {
-		allJobData = geocoding.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
-	}
-	allJobData = mappingService.GenerateMap(allJobData, &shared.GuiWindowData{})
-	jobsDatabase := database.CreateDatabase(programData.OutputDirectory)
-	database.SetupDatabase(jobsDatabase)
-	database.WriteToDatabase(jobsDatabase, allJobData)
-	return allJobData
 }
