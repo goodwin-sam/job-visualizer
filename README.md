@@ -1,6 +1,21 @@
-# Job Visualizer
+# Job Visualizer 📊
+
+[![Go Version](https://img.shields.io/badge/go-%3E%3D1.19-blue.svg)](https://golang.org/)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey.svg)]()
 
 A desktop application for visualizing and analyzing job data from Excel files. The application runs with a GUI or through command line with a --headless argument.  It has processing capabilities for job data analysis, mapping, and filtering.
+
+## Table of Contents
+
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Download and Installation](#download-and-installation)
+- [Usage](#usage)
+- [Data Format](#data-format)
+- [System Requirements](#system-requirements)
+- [Troubleshooting](#troubleshooting)
+
+
 
 ## Features
 
@@ -10,6 +25,14 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 - **Job Mapping**: Visualize job locations on interactive maps with web browser integration
 - **Geocoding & Caching**: Automatic location geocoding with local caching for faster processing
 - **Database Storage**: SQLite database for efficient data management
+
+## Quick Start
+
+1. **Download** the latest AppImage from [Releases](https://github.com/samg111/job-visualizer/releases)
+2. **Make it executable**: `chmod +x job-visualizer-v*.AppImage`
+3. **Run**: `./job-visualizer-v*.AppImage`
+4. **Select** your Excel files and output directory
+5. **Click** "Start Application" to begin processing
 
 ## Download and Installation
 
@@ -55,97 +78,99 @@ go run ./cmd/app --headless
 
 ## Usage
 
-### GUI Mode (Default)
+### 🖥️ GUI Mode (Default)
 
-1. Launch the application
-2. Use the file selection button to choose one or more Excel files (`.xlsx` or `.xls`)
-3. Select an output directory for a sqlite database with processed data
-4. Click "Start Application" to begin processing
-5. Once processing is complete, you'll see the main interface with filtering options, full or filtered job list, and selected job details
-6. Use the filtering options to search and filter jobs by:
-   - Keywords
-   - Location
-   - Minimum salary
-   - Work-from-home options
+1. **Launch** the application
+2. **Select files** using the file selection button to choose one or more Excel files (`.xlsx` or `.xls`)
+3. **Choose output directory** for the SQLite database with processed data
+4. **Click** "Start Application" to begin processing
+5. **Explore** the main interface with filtering options, job list, and detailed job information
+6. **Filter jobs** using the search options:
+   - **Keywords** - Search by job title or company
+   - **Location** - Filter by city, state, or country
+   - **Minimum salary** - Set salary thresholds
+   - **Work-from-home** - Filter remote work options
 
-**Output Files**: The application creates SQLite database files in your selected output directory
-- These database files can be opened with any SQLite browser for further analysis
+> **📁 Output Files**: The application creates SQLite database files in your selected output directory that can be opened with any SQLite browser for further analysis.
 
-### Headless Mode
+### ⚡ Headless Mode
 
-Run the application with argument --headless for headless processing:
+Run the application with the `--headless` argument for command-line processing:
 
 ```bash
 # Process all Excel files in current directory
 ./job-visualizer-vX.X.X-x86_64.AppImage --headless
 ```
 
-The headless mode will:
-- Process all `.xlsx` and `.xls` files in the current working directory
-- Display job information in a sqlite database table in the current working directory
-- Output results in a formatted table to the command line also
+**What headless mode does:**
+- Processes all `.xlsx` and `.xls` files in the current working directory
+- Creates a SQLite database table in the current working directory
+- Outputs results in a formatted table to the command line
 
-## Data Format
+## 📋 Data Format
 
 The application expects Excel files with the following requirements:
 
-### Worksheet Requirements
+### 📊 Worksheet Requirements
 - **Worksheet Name**: Must be named "jobs" (case-insensitive - "jobs", "Jobs", "JOBS" all work)
 - **Header Row**: First row must contain column headers
 - **Data Rows**: All subsequent rows contain job data
 
-### Column Structure
-Please see demo excel file `demoData.xlsx` for reference:
-- A1: Company Name
-- B1: Posting Age
-- C1: JobId
-- D1: Country
-- E1: Location
-- F1: Publication Date
-- G1: Salary Max
-- H1: Salary Min
-- I1: Salary Type
-- J1: Job Title
+### 📐 Column Structure
+> **💡 Reference**: See the demo Excel file `demoData.xlsx` for a complete example.
 
-### Geocoding & Caching
-- **Automatic Geocoding**: Job locations are automatically converted to coordinates using OpenStreetMap's Nominatim API
-- **Intelligent Caching**: Geocoded locations are cached in `~/.job-visualizer/cached_locations.json` to avoid repeated API calls
+| Column | Header | Description |
+|--------|--------|-------------|
+| A | Company Name | Name of the hiring company |
+| B | Posting Age | How long the job has been posted |
+| C | JobId | Unique identifier for the job |
+| D | Country | Country where the job is located |
+| E | Location | City/State/Region of the job |
+| F | Publication Date | When the job was posted |
+| G | Salary Max | Maximum salary offered |
+| H | Salary Min | Minimum salary offered |
+| I | Salary Type | Type of salary (hourly, annual, etc.) |
+| J | Job Title | Title of the position |
+
+### 🌍 Geocoding & Caching
+- **📍 Automatic Geocoding**: Job locations are automatically converted to coordinates using OpenStreetMap's Nominatim API
+- **💾 Intelligent Caching**: Geocoded locations are cached in `~/.job-visualizer/cached_locations.json` to avoid repeated API calls
 - **Location Standardization**: Location strings are cleaned and standardized to reduce repeated API calls on the same cities/towns
-- **Performance**: Cached locations load instantly, significantly speeding up subsequent processing runs
+- **⚡ Performance**: Cached locations load instantly, significantly speeding up subsequent processing runs
 
-## System Requirements
+## 💻 System Requirements
 
-- **Operating System**: Linux (AppImage), Windows (.exe)
-- **Dependencies**: None required for AppImage or .exe (self-contained)
+- **🖥️ Operating System**: Linux (AppImage), Windows (.exe)
+- **📦 Dependencies**: None required for AppImage or .exe (self-contained)
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
-### AppImage Issues
+### 🐧 AppImage Issues
 
 If the AppImage doesn't run:
 
-1. **Check permissions**:
+1. **🔐 Check permissions**:
    ```bash
    chmod +x job-visualizer-vX.X.X-x86_64.AppImage
    ```
 
-2. **Run from terminal to see errors**:
+2. **🖥️ Run from terminal to see errors**:
    ```bash
    ./job-visualizer-vX.X.X-x86_64.AppImage
    ```
 
-3. **Check if your system supports AppImages**:
+3. **📦 Check if your system supports AppImages**:
    ```bash
    # Install AppImageLauncher (Ubuntu/Debian)
    sudo apt install appimagelauncher
    ```
 
-### Build Issues
+### 🔨 Build Issues
 
 If building from source fails:
 
-1. **Ensure Go is installed** (version 1.19 or later)
-2. **Install OpenGL development packages**:
+1. **✅ Ensure Go is installed** (version 1.19 or later)
+2. **📚 Install OpenGL development packages**:
    ```bash
    # Ubuntu/Debian
    sudo apt install libgl1-mesa-dev xorg-dev
