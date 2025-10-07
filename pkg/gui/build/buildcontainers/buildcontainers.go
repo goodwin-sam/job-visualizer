@@ -1,3 +1,4 @@
+// package buildcontainers provides container layout and organization for GUI components
 package buildcontainers
 
 import (
@@ -10,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// BuildStartContainer creates the layout for the initial file selection window
 func BuildStartContainer(window fyne.Window, startButton *widget.Button, progressBar *widget.ProgressBar, programData *shared.ProgramData) *fyne.Container {
 	startLabel := buildwidgets.BuildLabel("Welcome to job-visualizer, choose your input files and output file location",
 		true, false)
@@ -24,6 +26,7 @@ func BuildStartContainer(window fyne.Window, startButton *widget.Button, progres
 	return container.NewVBox(startLabel, inputOutputContainers, startButton, quitButton)
 }
 
+// BuildLeftSplit creates the left panel with job list and filtering controls
 func BuildLeftSplit(jobs []shared.JobData, windowData *shared.GuiWindowData, mappingService interface{}) *container.Split {
 	createJobList(windowData)
 	refreshButton, filterButton, selectedDetailsButton := buildwidgets.BuildMainButtons(jobs, windowData, mappingService)
@@ -44,6 +47,7 @@ func BuildLeftSplit(jobs []shared.JobData, windowData *shared.GuiWindowData, map
 	return leftSplit
 }
 
+// BuildRightSplit creates the right panel for displaying job details
 func BuildRightSplit(windowData *shared.GuiWindowData) *fyne.Container {
 	detailsLabel := buildwidgets.BuildLabel("Select a job to display details", true, false)
 	detailsLabel.Wrapping = fyne.TextWrapWord
@@ -52,6 +56,7 @@ func BuildRightSplit(windowData *shared.GuiWindowData) *fyne.Container {
 	return rightPane
 }
 
+// createJobList initializes the job list widget with data
 func createJobList(windowData *shared.GuiWindowData) {
 	getDataLen := func() int {
 		if windowData.FilteredJobs == nil {
@@ -70,10 +75,12 @@ func createJobList(windowData *shared.GuiWindowData) {
 	}
 }
 
+// createListItem creates individual list item widgets for the job list
 func createListItem() fyne.CanvasObject {
 	return widget.NewLabel("list items here")
 }
 
+// formatJobDetails formats job data into a readable string for display
 func formatJobDetails(i int, window shared.GuiWindowData) string {
 	jobData := *window.FilteredJobs
 	job := jobData[i]
@@ -84,6 +91,7 @@ func formatJobDetails(i int, window shared.GuiWindowData) string {
 	return formattedDetails
 }
 
+// buildFilterContainer creates the filter controls container
 func buildFilterContainer(windowData *shared.GuiWindowData) *fyne.Container {
 	keywordContainer := buildKeywordContainer(windowData)
 	locationContainer := buildLocationContainer(windowData)

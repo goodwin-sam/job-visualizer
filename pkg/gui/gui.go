@@ -1,13 +1,11 @@
+// package gui provides gui operations
 package gui
 
 import (
 	"fmt"
-	"job-visualizer/pkg/database"
-	"job-visualizer/pkg/excel"
 	"job-visualizer/pkg/gui/build"
-	"job-visualizer/pkg/jobdata"
-	"job-visualizer/pkg/jobdata/processing"
 	"job-visualizer/pkg/mapping"
+	"job-visualizer/pkg/processor"
 	"job-visualizer/pkg/shared"
 	"os"
 	"path/filepath"
@@ -20,6 +18,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// RunGUIorHeadless launches either GUI or headless mode based on user preference
 func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 	if headless {
 		workingDirectory, err := os.Getwd()
@@ -40,7 +39,7 @@ func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 		programData.InputFiles = inputFiles
 		programData.OutputDirectory = workingDirectory
 
-		allJobData := processJobs(programData, nil, mapping.NewMappingService())
+		allJobData := processor.ProcessJobs(programData, nil, mapping.NewMappingService())
 		for i, job := range allJobData {
 			if i%100 == 0 {
 				fmt.Printf("%-4s | %-25s | %-55s | %-25s\n",
@@ -55,6 +54,7 @@ func RunGUIorHeadless(programData shared.ProgramData, headless bool) {
 	}
 }
 
+// createGuiApp initializes and runs the GUI application
 func createGuiApp(programData shared.ProgramData) {
 	application := app.NewWithID("job-visualizer")
 	progressBar := widget.NewProgressBar()
@@ -64,7 +64,7 @@ func createGuiApp(programData shared.ProgramData) {
 	startWindow := createGuiWindow(application, "job-visualizer")
 	startButton := widget.NewButton("Start Application", func() {
 		go func() {
-			allJobData := processJobs(programData, progressBar, mappingService)
+			allJobData := processor.ProcessJobs(programData, progressBar, mappingService)
 			fyne.DoAndWait(func() {
 				mainWindow := createGuiWindow(application, "job-visualizer")
 				mainWindow.SetOnClosed(func() { application.Quit() })
@@ -78,24 +78,9 @@ func createGuiApp(programData shared.ProgramData) {
 	startWindow.ShowAndRun()
 }
 
+// createGuiWindow creates a new Fyne window
 func createGuiWindow(app fyne.App, title string) fyne.Window {
 	Window := app.NewWindow(title)
 	Window.Resize(fyne.NewSize(1000, 600))
 	return Window
-}
-
-func processJobs(programData shared.ProgramData, progressBar *widget.ProgressBar, mappingService *mapping.MappingService) []shared.JobData {
-	files := excel.OpenExcelFile(programData.InputFiles)
-	rows := excel.GetAllRows(files)
-	allJobData := jobdata.ProcessRows(rows, []shared.JobData{})
-	if progressBar != nil {
-		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, progressBar)
-	} else {
-		allJobData = processing.ProcessLatLongs(allJobData, programData.CacheDirectory, nil)
-	}
-	allJobData = mappingService.GenerateMap(allJobData, &shared.GuiWindowData{})
-	jobsDatabase := database.CreateDatabase(programData.OutputDirectory)
-	database.SetupDatabase(jobsDatabase)
-	database.WriteToDatabase(jobsDatabase, allJobData)
-	return allJobData
 }

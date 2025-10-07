@@ -1,3 +1,4 @@
+// package mapping handles displaying the map of the jobs
 package mapping
 
 import (
@@ -9,14 +10,25 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
+// MappingService handles the creation and serving of interactive job location maps
 type MappingService struct {
 	geoplotMap *geoplot.Map
 }
 
+// NewMappingService creates a new instance of the MappingService
 func NewMappingService() *MappingService {
 	return &MappingService{}
 }
 
+// GenerateMap creates an interactive map from job data and starts the HTTP server, entry point
+func (ms *MappingService) GenerateMap(jobs []shared.JobData, windowData *shared.GuiWindowData) []shared.JobData {
+	ms.geoplotMap = ms.createGeoplotMap(jobs)
+	windowData.Server = ms.createHttpServer(windowData)
+	openWebpage()
+	return jobs
+}
+
+// mapPage serves the main map page HTML
 func (ms *MappingService) mapPage(writer http.ResponseWriter, request *http.Request) {
 	if ms.geoplotMap != nil {
 		writer.Header().Set("Content-Type", "text/html")
@@ -36,6 +48,7 @@ func (ms *MappingService) mapPage(writer http.ResponseWriter, request *http.Requ
 	}
 }
 
+// innerMap serves the actual interactive map
 func (ms *MappingService) innerMap(writer http.ResponseWriter, request *http.Request) {
 	if ms.geoplotMap != nil {
 		err := geoplot.ServeMap(writer, request, ms.geoplotMap)
@@ -45,13 +58,7 @@ func (ms *MappingService) innerMap(writer http.ResponseWriter, request *http.Req
 	}
 }
 
-func (ms *MappingService) GenerateMap(jobs []shared.JobData, windowData *shared.GuiWindowData) []shared.JobData {
-	ms.geoplotMap = ms.createGeoplotMap(jobs)
-	windowData.Server = ms.createHttpServer(windowData)
-	openWebpage()
-	return jobs
-}
-
+// createGeoplotMap creates a complete interactive map with job location markers
 func (ms *MappingService) createGeoplotMap(jobs []shared.JobData) *geoplot.Map {
 	geoplotMap := ms.createBaseMap()
 	ms.createMarkers(jobs, geoplotMap)
@@ -59,6 +66,7 @@ func (ms *MappingService) createGeoplotMap(jobs []shared.JobData) *geoplot.Map {
 	return geoplotMap
 }
 
+// createBaseMap creates the base map configuration centered on Boston
 func (ms *MappingService) createBaseMap() *geoplot.Map {
 	boston := &geoplot.LatLng{
 		Latitude:  42.361145,
@@ -75,6 +83,7 @@ func (ms *MappingService) createBaseMap() *geoplot.Map {
 	return geoplotMap
 }
 
+// createMarkers adds job location markers to the map, grouping multiple jobs at same location
 func (ms *MappingService) createMarkers(jobs []shared.JobData, geoplotMap *geoplot.Map) {
 	commonLocations := make(map[shared.LatLong][]shared.JobData)
 	for _, job := range jobs {
@@ -101,6 +110,7 @@ func (ms *MappingService) createMarkers(jobs []shared.JobData, geoplotMap *geopl
 	}
 }
 
+// displayHoverword creates hover text for map markers
 func displayHoverword(markerJobs []shared.JobData) string {
 	hoverword := ""
 	jobLength := len(markerJobs)
@@ -121,6 +131,7 @@ func displayHoverword(markerJobs []shared.JobData) string {
 	return hoverword
 }
 
+// displayDescription creates popup content for map markers showing job details
 func displayDescription(markerJobs []shared.JobData) string {
 	description := ""
 	for i, job := range markerJobs {
@@ -134,6 +145,7 @@ func displayDescription(markerJobs []shared.JobData) string {
 	return description
 }
 
+// createHttpServer sets up HTTP server for map serving
 func (ms *MappingService) createHttpServer(windowData *shared.GuiWindowData) *http.Server {
 	if windowData.Server != nil {
 		err := windowData.Server.Close()
@@ -152,6 +164,7 @@ func (ms *MappingService) createHttpServer(windowData *shared.GuiWindowData) *ht
 	return server
 }
 
+// openWebpage opens the map in the user's default browser
 func openWebpage() {
 	url := "http://localhost:8080/map"
 	err := open.Run(url)

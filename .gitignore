@@ -26,6 +26,7 @@ go.work.sum
 
 # build files
 job-visualizer
+app
 
 #database files
 job_data.sqlite
@@ -39,4 +40,3 @@ todo.txt
 #packaging
 releases/
 AppDir/
-appimagetool-x86_64.AppImage

@@ -1,10 +1,12 @@
-package jobdata
+// package jobsprocessing provides tests for job data processing functionality
+package jobsprocessing
 
 import (
 	"job-visualizer/pkg/shared"
 	"testing"
 )
 
+// createTestJob creates a test job with specified field values
 func createTestJob(company, title, country, location, datePosted string, salary int) shared.JobData {
 	return shared.JobData{
 		CompanyName: company,
@@ -16,6 +18,7 @@ func createTestJob(company, title, country, location, datePosted string, salary 
 	}
 }
 
+// createTestRows creates test Excel rows with header and data rows
 func createTestRows(header bool, dataRows ...[]string) [][]string {
 	rows := [][]string{}
 	if header {
@@ -25,10 +28,12 @@ func createTestRows(header bool, dataRows ...[]string) [][]string {
 	return rows
 }
 
+// createSalaryTestRow creates a test row with salary-related fields for testing
 func createSalaryTestRow(maxSalary, minSalary, hourlyYearly string) []string {
 	return []string{"", "", "", "", "", "", maxSalary, minSalary, hourlyYearly, ""}
 }
 
+// assertJobData verifies that job data matches expected row values
 func assertJobData(t *testing.T, job shared.JobData, expectedRow []string) {
 	if job.CompanyName != expectedRow[0] {
 		t.Errorf("CompanyName = %v, want %v", job.CompanyName, expectedRow[0])
@@ -47,6 +52,7 @@ func assertJobData(t *testing.T, job shared.JobData, expectedRow []string) {
 	}
 }
 
+// TestProcessRows tests the ProcessRows function with various input scenarios
 func TestProcessRows(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -55,18 +61,21 @@ func TestProcessRows(t *testing.T) {
 		expected   int
 	}{
 		{
+			// tests handling of empty input rows
 			name:       "Empty rows should return original data",
 			rows:       [][]string{},
 			allJobData: []shared.JobData{createTestJob("Existing Company", "Existing Job", "", "", "", 0)},
 			expected:   1,
 		},
 		{
+			// tests handling of header-only rows
 			name:       "Single header row should return original data",
 			rows:       createTestRows(true),
 			allJobData: []shared.JobData{createTestJob("Existing Company", "Existing Job", "", "", "", 0)},
 			expected:   1,
 		},
 		{
+			// tests processing of valid job data with multiple rows
 			name: "Valid job data should be processed correctly",
 			rows: createTestRows(true,
 				[]string{"Tech Corp", "2024-01-15", "123", "USA", "New York", "Col5", "120000", "80000", "yearly", "Software Engineer"},
@@ -76,6 +85,7 @@ func TestProcessRows(t *testing.T) {
 			expected:   2,
 		},
 		{
+			// tests skipping of rows with insufficient columns
 			name: "Row with insufficient columns should be skipped",
 			rows: createTestRows(true,
 				[]string{"Tech Corp", "2024-01-15", "123", "USA", "New York"},
@@ -85,6 +95,7 @@ func TestProcessRows(t *testing.T) {
 			expected:   1,
 		},
 		{
+			// tests appending new jobs to existing job data
 			name: "Should append to existing job data",
 			rows: createTestRows(true,
 				[]string{"Tech Corp", "2024-01-15", "123", "USA", "New York", "Col5", "120000", "80000", "yearly", "Software Engineer"},
@@ -114,6 +125,7 @@ func TestProcessRows(t *testing.T) {
 	}
 }
 
+// TestCalcSalary tests the calcSalary function with various salary calculation scenarios
 func TestCalcSalary(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -121,31 +133,37 @@ func TestCalcSalary(t *testing.T) {
 		expected int
 	}{
 		{
+			// tests average calculation for yearly salaries
 			name:     "Yearly salary calculation",
 			row:      createSalaryTestRow("120000", "80000", "yearly"),
 			expected: 100000, // (120000 + 80000) / 2
 		},
 		{
+			// tests hourly to yearly conversion (40 hours/week * 50 weeks/year)
 			name:     "Hourly salary calculation",
 			row:      createSalaryTestRow("50", "30", "hourly"),
 			expected: 80000, // (50 + 30) / 2 * 40 * 50 = 40 * 40 * 50 = 80000
 		},
 		{
+			// tests handling of zero salary values
 			name:     "Zero salary values",
 			row:      createSalaryTestRow("0", "0", "yearly"),
 			expected: 0,
 		},
 		{
+			// tests handling of identical min and max salaries
 			name:     "Same min and max salary",
 			row:      createSalaryTestRow("75000", "75000", "yearly"),
 			expected: 75000,
 		},
 		{
+			// tests decimal salary handling with truncation
 			name:     "Decimal salary values",
 			row:      createSalaryTestRow("125000.50", "75000.25", "yearly"),
 			expected: 100000, // (125000.50 + 75000.25) / 2 = 100000.375, truncated to int
 		},
 		{
+			// tests hourly conversion with decimal values
 			name:     "Hourly with decimal values",
 			row:      createSalaryTestRow("45.50", "35.25", "hourly"),
 			expected: 80750, // (45.50 + 35.25) / 2 * 40 * 50 = 40.375 * 40 * 50 = 80750
