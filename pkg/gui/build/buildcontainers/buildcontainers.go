@@ -23,7 +23,7 @@ func BuildStartContainer(window fyne.Window, startButton *widget.Button, progres
 	outputDirectoryBox := container.NewVBox(outputDirectoryLabel, outputDirectoryButton)
 	inputOutputContainers := container.NewHSplit(inputFilesBox, outputDirectoryBox)
 
-	return container.NewVBox(startLabel, inputOutputContainers, startButton, quitButton)
+	return container.NewVBox(startLabel, inputOutputContainers, progressBar, startButton, quitButton)
 }
 
 // BuildLeftSplit creates the left panel with job list and filtering controls
