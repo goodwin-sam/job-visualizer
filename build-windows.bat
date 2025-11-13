@@ -1,29 +1,18 @@
 @echo off
-echo Building Job Visualizer for Windows...
-
-REM Prompt user for version number
-set /p VERSION="Enter version number (e.g., v0.1.0): "
-
-echo Building version: %VERSION%
-
-REM Set build environment for Windows 64-bit
-set GOOS=windows
-set GOARCH=amd64
-
-REM Build the application with optimizations
-echo Building executable...
-go build -ldflags="-s -w" -o job-visualizer-%VERSION%-windows-amd64.exe ./cmd/app
-
-if %ERRORLEVEL% EQU 0 (
-    echo.
-    echo Build successful!
-    echo Executable created: job-visualizer-%VERSION%-windows-amd64.exe
-    echo.
-    echo You can now distribute this single file to Windows users.
-    echo They can run it by double-clicking the .exe file.
+if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+    set GOARCH=amd64
+    set ARCH_NAME=amd64
+) else if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+    set GOARCH=386
+    set ARCH_NAME=386
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+    set GOARCH=arm64
+    set ARCH_NAME=arm64
 ) else (
-    echo.
-    echo Build failed! Please check the error messages above.
+    set GOARCH=amd64
+    set ARCH_NAME=amd64
 )
 
-pause
+set /p VERSION="Enter version number: "
+set GOOS=windows
+go build -ldflags="-s -w" -o job-visualizer-%VERSION%-windows-%ARCH_NAME%.exe ./cmd/app
