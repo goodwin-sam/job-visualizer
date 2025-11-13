@@ -9,7 +9,7 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 
 - [Features](#features)
 - [Quick Start](#quick-start)
-- [Download and Installation](#download-and-installation)
+- [Download](#download)
 - [Usage](#usage)
 - [Data Format](#data-format)
 - [System Requirements](#system-requirements)
@@ -28,28 +28,71 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 
 ## Quick Start
 
+### 🐧 Linux
+
 1. **Download** the latest AppImage from [Releases](https://github.com/samg111/job-visualizer/releases)
-2. **Make it executable**: `chmod +x job-visualizer-v*.AppImage`
-3. **Run**: `./job-visualizer-v*.AppImage`
+2. **Make it executable**: `chmod +x job-visualizer-vX.X.X.AppImage`
+3. **Run**: `./job-visualizer-vX.X.X.AppImage`
 4. **Select** your Excel files and output directory
 5. **Click** "Start Application" to begin processing
 
-## Download and Installation
+### 🪟 Windows
 
-### Option 1: AppImage (Recommended)
+1. **Download** the latest `.exe` file from [Releases](https://github.com/samg111/job-visualizer/releases)
+2. **Run** the downloaded `job-visualizer-vX.X.X.exe` file
+3. **Select** your Excel files and output directory
+4. **Click** "Start Application" to begin processing
+
+## Download and Run
+
+> **💡 Note**: No installation required - these are portable executables that run directly.
+
+### Option 1: Pre-built Binaries (Recommended)
+
+#### 🐧 Linux - AppImage
 
 1. **Download the AppImage**:
    - Go to the [Releases](https://github.com/samg111/job-visualizer/releases) page
    - Download the latest `job-visualizer-vX.X.X-x86_64.AppImage` file
 
-2. **Run the application**:
+2. **Make it executable**:
    ```bash
-   # If appimage file saved in current directory
-   ./job-visualizer-vX.X.X-x86_64.AppImage
-   
-   # If saved in PATH (e.g., /usr/local/bin/)
-   job-visualizer-vX.X.X-x86_64.AppImage
+   chmod +x job-visualizer-vX.X.X-x86_64.AppImage
    ```
+
+3. **Run the application**:
+   
+   - **Double-click** the AppImage file to launch the GUI
+   - **Or run from terminal**:
+     ```bash
+     # If appimage file saved in current directory
+     ./job-visualizer-vX.X.X-x86_64.AppImage
+     
+     # If saved in PATH (e.g., /usr/local/bin/)
+     job-visualizer-vX.X.X-x86_64.AppImage
+     ```
+   - **Or run headless** (command-line only):
+     ```bash
+     ./job-visualizer-vX.X.X-x86_64.AppImage --headless
+     ```
+
+#### 🪟 Windows - Executable
+
+1. **Download the executable**:
+   - Go to the [Releases](https://github.com/samg111/job-visualizer/releases) page
+   - Download the latest `job-visualizer-vX.X.X-windows-amd64.exe` file
+
+2. **Run the application**:
+   
+   - **Double-click** the `.exe` file to launch the GUI
+   - **Or run from PowerShell/command prompt**:
+     ```powershell
+     ./job-visualizer-vX.X.X-windows-amd64.exe
+     ```
+   - **Or run headless** (command-line only):
+     ```powershell
+     ./job-visualizer-vX.X.X-windows-amd64.exe --headless
+     ```
 
 ### Option 2: Build from Source
 
