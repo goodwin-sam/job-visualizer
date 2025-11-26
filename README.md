@@ -31,17 +31,23 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 ### 🐧 Linux
 
 1. **Download** the latest AppImage from [Releases](https://github.com/samg111/job-visualizer/releases)
-2. **Make it executable**: `chmod +x job-visualizer-vX.X.X.AppImage`
-3. **Run**: `./job-visualizer-vX.X.X.AppImage`
-4. **Select** your Excel files and output directory
-5. **Click** "Start Application" to begin processing
+2. **Make it executable**: `chmod +x job-visualizer-vX.X.X-x86_64.AppImage`
+3. **Run**:
+   - Double-click the `.AppImage` file
+   - Or run from terminal: `./job-visualizer-vX.X.X-x86_64.AppImage` or `./job-visualizer-vX.X.X-x86_64.AppImage --headless`
+4. **Process your data**:
+   - **If in GUI**: Select your Excel files and output directory, then click "Start Application" to begin processing
+   - **If in headless**: The application will automatically process all Excel files in the current directory without any intervention
 
 ### 🪟 Windows
 
 1. **Download** the latest `.exe` file from [Releases](https://github.com/samg111/job-visualizer/releases)
-2. **Run** the downloaded `job-visualizer-vX.X.X.exe` file
-3. **Select** your Excel files and output directory
-4. **Click** "Start Application" to begin processing
+2. **Run**:
+   - Double-click the `.exe` file
+   - Or run from PowerShell/command prompt: `./job-visualizer-vX.X.X-windows-amd64.exe` or `./job-visualizer-vX.X.X-windows-amd64.exe --headless`
+3. **Process your data**:
+   - **If in GUI**: Select your Excel files and output directory, then click "Start Application" to begin processing
+   - **If in headless**: The application will automatically process all Excel files in the current directory without any intervention
 
 ## Download and Run
 
