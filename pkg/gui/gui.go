@@ -59,10 +59,12 @@ func createGuiApp(programData shared.ProgramData) {
 	application := app.NewWithID("job-visualizer")
 	progressBar := widget.NewProgressBar()
 	progressBar.SetValue(0)
+	progressBar.Hide()
 	windowData := &shared.GuiWindowData{}
 	mappingService := mapping.NewMappingService()
 	startWindow := createGuiWindow(application, "job-visualizer")
 	startButton := widget.NewButton("Start Application", func() {
+		progressBar.Show()
 		go func() {
 			allJobData := processor.ProcessJobs(programData, progressBar, mappingService)
 			fyne.DoAndWait(func() {
