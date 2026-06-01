@@ -1,5 +1,6 @@
 # Job Visualizer 📊
 
+[![Build Status](https://github.com/goodwin-sam/job-visualizer/workflows/Build,%20test%20and%20lint%20job-visualizer/badge.svg)](https://github.com/goodwin-sam/job-visualizer/actions)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.19-blue.svg)](https://golang.org/)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey.svg)]()
 
@@ -26,11 +27,37 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 - **Geocoding & Caching**: Automatic location geocoding with local caching for faster processing
 - **Database Storage**: SQLite database for efficient data management
 
+## 🛠 Tech Stack
+
+**Core**
+- **Go**
+- **Fyne** — Cross-platform GUI framework
+- **SQLite** — Lightweight local database
+
+**Data & Integration**
+- **Excelize** — Excel file import/export
+- **Nominatim** — Address geocoding using OpenStreetMap
+
+**DevOps**
+- **GitHub Actions** — Continuous Integration
+- **Cross-Platform** — Multi-platform releases (AppImage, .exe, etc.)
+
+## Screenshots
+
+### Geocoded Map View
+![Map View w/ Pin Description](screenshots/map-w-pin-desc.png)
+
+### Data Filtering & Analysis
+![Filtering Location](screenshots/data-filtering-location.png)
+
+### CLI Mode
+![CLI](screenshots/cli.png)
+
 ## Quick Start
 
 ### 🐧 Linux
 
-1. **Download** the latest AppImage from [Releases](https://github.com/samg111/job-visualizer/releases)
+1. **Download** the latest AppImage from [Releases](https://github.com/goodwin-sam/job-visualizer/releases)
 2. **Make it executable**: `chmod +x job-visualizer-vX.X.X-x86_64.AppImage`
 3. **Run**:
    - Double-click the `.AppImage` file
@@ -41,7 +68,7 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 
 ### 🪟 Windows
 
-1. **Download** the latest `.exe` file from [Releases](https://github.com/samg111/job-visualizer/releases)
+1. **Download** the latest `.exe` file from [Releases](https://github.com/goodwin-sam/job-visualizer/releases)
 2. **Run**:
    - Double-click the `.exe` file
    - Or run from PowerShell/command prompt: `./job-visualizer-vX.X.X-windows-amd64.exe` or `./job-visualizer-vX.X.X-windows-amd64.exe --headless`
@@ -58,7 +85,7 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 #### 🐧 Linux - AppImage
 
 1. **Download the AppImage**:
-   - Go to the [Releases](https://github.com/samg111/job-visualizer/releases) page
+   - Go to the [Releases](https://github.com/goodwin-sam/job-visualizer/releases) page
    - Download the latest `job-visualizer-vX.X.X-x86_64.AppImage` file
 
 2. **Make it executable**:
@@ -85,7 +112,7 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 #### 🪟 Windows - Executable
 
 1. **Download the executable**:
-   - Go to the [Releases](https://github.com/samg111/job-visualizer/releases) page
+   - Go to the [Releases](https://github.com/goodwin-sam/job-visualizer/releases) page
    - Download the latest `job-visualizer-vX.X.X-windows-amd64.exe` file
 
 2. **Run the application**:
@@ -105,15 +132,15 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 If you prefer to build from source, you'll need the following dependencies:
 
 ```bash
-   # Ubuntu/Debian
-   sudo apt install libgl1-mesa-dev xorg-dev
-   
-   # Fedora
-   sudo dnf install mesa-libGL-devel libX11-devel
-   
-   # Arch Linux
-   sudo pacman -S mesa libx11
-   ```
+# Ubuntu/Debian
+sudo apt install libgl1-mesa-dev xorg-dev
+
+# Fedora
+sudo dnf install mesa-libGL-devel libX11-devel
+
+# Arch Linux
+sudo pacman -S mesa libx11
+```
 
 Then build and run:
 
@@ -189,26 +216,26 @@ The application expects Excel files with the following requirements:
 
 ## 💻 System Requirements
 
-- **🖥️ Operating System**: Linux (AppImage), Windows (.exe)
-- **📦 Dependencies**: None required for AppImage or .exe (self-contained)
+- **Operating System**: Linux (AppImage), Windows (.exe)
+- **Dependencies**: None required for AppImage or .exe (self-contained)
 
 ## 🔧 Troubleshooting
 
-### 🐧 AppImage Issues
+### AppImage Issues
 
 If the AppImage doesn't run:
 
-1. **🔐 Check permissions**:
+1. **Check permissions**:
    ```bash
    chmod +x job-visualizer-vX.X.X-x86_64.AppImage
    ```
 
-2. **🖥️ Run from terminal to see errors**:
+2. **Run from terminal to see errors**:
    ```bash
    ./job-visualizer-vX.X.X-x86_64.AppImage
    ```
 
-3. **📦 Check if your system supports AppImages**:
+3. **Check if your system supports AppImages**:
    ```bash
    # Install AppImageLauncher (Ubuntu/Debian)
    sudo apt install appimagelauncher
@@ -218,8 +245,8 @@ If the AppImage doesn't run:
 
 If building from source fails:
 
-1. **✅ Ensure Go is installed** (version 1.19 or later)
-2. **📚 Install OpenGL development packages**:
+1. **Ensure Go is installed** (version 1.19 or later)
+2. **Install OpenGL development packages**:
    ```bash
    # Ubuntu/Debian
    sudo apt install libgl1-mesa-dev xorg-dev
