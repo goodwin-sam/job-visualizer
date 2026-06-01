@@ -132,15 +132,15 @@ A desktop application for visualizing and analyzing job data from Excel files. T
 If you prefer to build from source, you'll need the following dependencies:
 
 ```bash
-   # Ubuntu/Debian
-   sudo apt install libgl1-mesa-dev xorg-dev
-   
-   # Fedora
-   sudo dnf install mesa-libGL-devel libX11-devel
-   
-   # Arch Linux
-   sudo pacman -S mesa libx11
-   ```
+# Ubuntu/Debian
+sudo apt install libgl1-mesa-dev xorg-dev
+
+# Fedora
+sudo dnf install mesa-libGL-devel libX11-devel
+
+# Arch Linux
+sudo pacman -S mesa libx11
+```
 
 Then build and run:
 
